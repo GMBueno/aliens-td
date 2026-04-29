@@ -137,15 +137,15 @@ const level1 = {
         },
         {
           "enemy": "alien_normal",
-          "at": 1.25
+          "at": 1.5
         },
         {
           "enemy": "alien_normal",
-          "at": 2
+          "at": 2.5
         },
         {
           "enemy": "alien_normal",
-          "at": 2.75
+          "at": 3.0
         },
         {
           "enemy": "alien_normal",
@@ -166,40 +166,36 @@ const level1 = {
         },
         {
           "enemy": "alien_normal",
-          "at": 1.15
+          "at": 0.6
         },
         {
           "enemy": "alien_normal",
-          "at": 1.9
+          "at": 0.8
         },
         {
           "enemy": "alien_normal",
-          "at": 2.65
+          "at": 2.4
         },
         {
           "enemy": "alien_normal",
-          "at": 3.4
+          "at": 2.6
         },
         {
           "enemy": "alien_normal",
-          "at": 4.15
+          "at": 2.8
         },
         {
           "enemy": "alien_fast",
-          "at": 3.5
+          "at": 2.9
         },
         {
           "enemy": "alien_fast",
-          "at": 4.05
+          "at": 3.0
         },
         {
           "enemy": "alien_fast",
-          "at": 4.6
+          "at": 3.1
         },
-        {
-          "enemy": "alien_tank",
-          "at": 7.8
-        }
       ]
     },
     {
@@ -222,36 +218,28 @@ const level1 = {
           "at": 2.15
         },
         {
-          "enemy": "alien_tank",
-          "at": 3.5
-        },
-        {
-          "enemy": "alien_tank",
-          "at": 4.65
+          "enemy": "alien_normal",
+          "at": 2.3
         },
         {
           "enemy": "alien_normal",
-          "at": 8.8
+          "at": 2.6
         },
         {
           "enemy": "alien_normal",
-          "at": 9.28
+          "at": 2.8
         },
         {
           "enemy": "alien_normal",
-          "at": 9.76
+          "at": 3.24
         },
         {
           "enemy": "alien_normal",
-          "at": 10.24
+          "at": 3.72
         },
         {
           "enemy": "alien_normal",
-          "at": 10.72
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 11.2
+          "at": 4.2
         }
       ]
     }

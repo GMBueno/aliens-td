@@ -180,73 +180,81 @@ const level9 = {
       "id": 1,
       "spawns": [
         {
-          "enemy": "alien_normal",
+          "enemy": "alien_shielded",
           "at": 0.5
         },
         {
-          "enemy": "alien_normal",
-          "at": 1.25
+          "enemy": "alien_saucer",
+          "at": 2.5
         },
         {
-          "enemy": "alien_normal",
-          "at": 2
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 2.75
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 3.5
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 4.25
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 5
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 5.75
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 6.5
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 7.25
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 8
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 8.75
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 9.5
-        },
-        {
-          "enemy": "alien_fast",
+          "enemy": "alien_boss",
           "at": 4.5
         },
-        {
-          "enemy": "alien_fast",
-          "at": 5.1
-        },
-        {
-          "enemy": "alien_fast",
-          "at": 5.7
-        },
-        {
-          "enemy": "alien_fast",
-          "at": 6.3
-        }
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 1.25
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 2
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 2.75
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 3.5
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 4.25
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 5
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 5.75
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 6.5
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 7.25
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 8
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 8.75
+        // },
+        // {
+        //   "enemy": "alien_normal",
+        //   "at": 9.5
+        // },
+        // {
+        //   "enemy": "alien_fast",
+        //   "at": 4.5
+        // },
+        // {
+        //   "enemy": "alien_fast",
+        //   "at": 5.1
+        // },
+        // {
+        //   "enemy": "alien_fast",
+        //   "at": 5.7
+        // },
+        // {
+        //   "enemy": "alien_fast",
+        //   "at": 6.3
+        // }
       ]
     },
     {

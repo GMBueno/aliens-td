@@ -152,33 +152,9 @@ const level2 = {
       "id": 1,
       "spawns": [
         {
-          "enemy": "alien_normal",
+          "enemy": "alien_tank",
           "at": 0.5
         },
-        {
-          "enemy": "alien_normal",
-          "at": 1.25
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 2
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 2.75
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 3.5
-        },
-        {
-          "enemy": "alien_normal",
-          "at": 4.25
-        },
-        {
-          "enemy": "alien_fast",
-          "at": 4.5
-        }
       ]
     },
     {
