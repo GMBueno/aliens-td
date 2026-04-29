@@ -11,6 +11,7 @@ export const assets = {
     wavePlaque: "assets/hud/wave-plaque.png",
     killsPlaque: "assets/hud/kills-plaque.png",
     playButton: "assets/hud/play-button.png",
+    pauseButton: "assets/hud/pause-button.png",
     menuButton: "assets/hud/menu-button.png",
     speedPlaque: "assets/hud/speed-plaque.png",
   },

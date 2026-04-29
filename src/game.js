@@ -8,13 +8,18 @@ const BOARD_PAD = 34;
 const NEXT_WAVE_DELAY = 2.2;
 const TIME_STOP = { duration: 4, cooldown: 18, price: 250 };
 let audioContext = null;
+const ASSET_CACHE_BUSTER = Date.now().toString(36);
+
+function assetUrl(src) {
+  return `${src}?v=${ASSET_CACHE_BUSTER}`;
+}
 
 function loadImage(src) {
   return new Promise((resolve) => {
     const image = new Image();
     image.onload = () => resolve(image);
     image.onerror = () => resolve(null);
-    image.src = src;
+    image.src = assetUrl(src);
   });
 }
 
@@ -54,7 +59,7 @@ function createAssetStore() {
 }
 
 function cssUrl(src) {
-  return `url("${src}")`;
+  return `url('${assetUrl(src)}')`;
 }
 
 function applyAssetCssVariables(root) {
@@ -66,6 +71,7 @@ function applyAssetCssVariables(root) {
     "--hud-wave-plaque": assetPaths.hud.wavePlaque,
     "--hud-kills-plaque": assetPaths.hud.killsPlaque,
     "--hud-play-button": assetPaths.hud.playButton,
+    "--hud-pause-button": assetPaths.hud.pauseButton,
     "--hud-menu-button": assetPaths.hud.menuButton,
     "--hud-speed-plaque": assetPaths.hud.speedPlaque,
     "--slot-price-plaque": assetPaths.slots.pricePlaque,
@@ -784,10 +790,10 @@ export function createGame({ ui, levels }) {
 
   function renderWeaponBar() {
     ui.weaponBar.innerHTML = weapons.map((weapon, index) => `
-      <article class="weapon-card" data-weapon-key="${weapon.key}" style="--slot-card-image: url('${weapon.slotCardAsset}')">
+      <article class="weapon-card" data-weapon-key="${weapon.key}" style="--slot-card-image: ${cssUrl(weapon.slotCardAsset)}">
         <button class="weapon-info-button" data-info-weapon-key="${weapon.key}" type="button" aria-label="View ${weapon.name} attributes">i</button>
         <span class="slot-label">Slot ${index + 1}</span>
-        <img class="weapon-art" src="${weapon.hudAsset}" alt="" draggable="false">
+        <img class="weapon-art" src="${assetUrl(weapon.hudAsset)}" alt="" draggable="false">
         <strong>${weapon.name}</strong>
         <small>${weapon.price}g</small>
       </article>
@@ -802,7 +808,7 @@ export function createGame({ ui, levels }) {
     ui.weaponInfoTitle.textContent = weapon.name;
     ui.weaponInventoryGrid.innerHTML = Array.from({ length: 9 }, (_, index) => index === 0
       ? `<button class="inventory-slot selected" type="button" aria-label="Selected ${weapon.name}">
-          <img class="inventory-art" src="${weapon.asset}" alt="" draggable="false">
+          <img class="inventory-art" src="${assetUrl(weapon.asset)}" alt="" draggable="false">
           <span>${weapon.nickname}</span>
         </button>`
       : `<button class="inventory-slot empty" type="button" aria-label="Empty inventory slot"></button>`).join("");
@@ -863,7 +869,8 @@ export function createGame({ ui, levels }) {
       angle: 0,
     };
     state.towers.push(tower);
-    state.selectedTowerId = tower.id;
+    state.selectedTowerId = null;
+    state.selectedWeaponKey = null;
   }
 
   function showResult() {
@@ -929,7 +936,7 @@ export function createGame({ ui, levels }) {
     if (!tile) return;
     const tower = state.towers.find((item) => item.row === tile.row && item.col === tile.col);
     if (tower) {
-      state.selectedTowerId = tower.id;
+      state.selectedTowerId = state.selectedTowerId === tower.id ? null : tower.id;
       state.selectedWeaponKey = null;
       syncHud();
       return;

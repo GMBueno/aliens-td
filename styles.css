@@ -168,8 +168,12 @@ button:disabled {
 .hud {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 10px;
+}
+
+.hud-top {
+  justify-content: center;
 }
 
 .hud-group {
@@ -211,7 +215,7 @@ button:disabled {
 }
 
 .hud-chip.wide {
-  min-width: min(250px, 22vw);
+  min-width: 210px;
 }
 
 .hud-chip span {
@@ -246,7 +250,7 @@ button:disabled {
 
 .player-chip {
   --hud-chip-bg: var(--hud-player-plaque);
-  min-width: min(214px, 20vw);
+  min-width: 230px;
   justify-content: flex-start;
   padding-left: 64px;
   padding-right: 18px;
@@ -255,7 +259,7 @@ button:disabled {
 .mission-chip {
   --hud-chip-bg: var(--hud-mission-plaque);
   justify-content: center;
-  padding-left: 78px;
+  padding-left: 64px;
 }
 
 .wave-chip {
@@ -290,12 +294,20 @@ button:disabled {
   cursor: pointer;
 }
 
+.player-chip strong {
+  position: absolute;
+  left: 78px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .player-chip i {
   position: absolute;
-  left: 92px;
-  bottom: 17px;
+  left: 116px;
+  top: 50%;
+  transform: translateY(-50%);
   width: var(--xp-progress, 0%);
-  max-width: calc(100% - 112px);
+  max-width: calc(100% - 138px);
   height: 8px;
   border-radius: 2px;
   background: var(--green);
@@ -389,42 +401,19 @@ button:disabled {
   place-items: center;
   color: transparent;
   position: relative;
-  background-image: var(--hud-play-button);
 }
 
 .icon-control::before,
 .icon-control::after {
-  content: "";
-  display: block;
+  content: none;
 }
 
-.icon-control.play-icon::before {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 16px solid var(--text);
-  transform: translate(-42%, -50%);
+.icon-control.play-icon {
+  background: var(--hud-play-button) center / contain no-repeat;
 }
 
-.icon-control.pause-icon::before,
-.icon-control.pause-icon::after {
-  position: absolute;
-  width: 6px;
-  height: 20px;
-  border-radius: 2px;
-  background: var(--text);
-}
-
-.icon-control.pause-icon::before {
-  transform: translateX(-5px);
-}
-
-.icon-control.pause-icon::after {
-  transform: translateX(5px);
+.icon-control.pause-icon {
+  background: var(--hud-pause-button) center / contain no-repeat;
 }
 
 .speed-state.fast {
@@ -433,9 +422,10 @@ button:disabled {
 
 .gear-button {
   color: transparent;
-  width: 108px;
+  width: 56px;
+  min-width: 56px;
   position: relative;
-  background-image: var(--hud-menu-button);
+  background: var(--hud-menu-button) center / contain no-repeat;
 }
 
 .gear-button::before {
@@ -505,7 +495,9 @@ button:disabled {
 
 .hud-bottom {
   display: grid;
-  grid-template-columns: minmax(116px, 170px) minmax(0, 1fr);
+  grid-template-columns: 170px auto;
+  justify-content: center;
+  gap: 10px;
 }
 
 .ability-card {
@@ -556,20 +548,20 @@ button:disabled {
 .weapon-bar {
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(6, minmax(88px, 1fr));
+  grid-template-columns: repeat(6, 170px);
   gap: 8px;
 }
 
 .weapon-card {
   position: relative;
   min-width: 0;
-  min-height: 136px;
+  min-height: 164px;
   color: var(--text);
   display: grid;
-  grid-template-rows: 18px minmax(62px, 1fr) auto auto;
+  grid-template-rows: 22px minmax(78px, 1fr) auto auto;
   justify-items: center;
   gap: 2px;
-  padding: 10px 12px 11px;
+  padding: 12px 12px 13px;
   cursor: pointer;
   overflow: hidden;
   border: 0;
@@ -625,8 +617,8 @@ button:disabled {
 
 .weapon-art {
   align-self: center;
-  width: min(120px, 94%);
-  height: 68px;
+  width: min(140px, 96%);
+  height: 84px;
   object-fit: contain;
   filter: drop-shadow(0 8px 7px rgba(0, 0, 0, 0.48));
   pointer-events: none;
@@ -839,7 +831,7 @@ button:disabled {
   }
 
   .weapon-card {
-    min-height: 126px;
+    min-height: 152px;
   }
 
   .weapon-info-body {
