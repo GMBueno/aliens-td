@@ -1,0 +1,628 @@
+import { getEnemy } from "./data/enemies.js";
+import { weapons } from "./data/weapons.js";
+import { PLAYER_PROFILE_KEY, createDefaultProfile, xpNeeded } from "./data/player.js";
+
+const TWO_PI = Math.PI * 2;
+const BOARD_PAD = 34;
+const NEXT_WAVE_DELAY = 2.2;
+const TIME_STOP = { duration: 4, cooldown: 18, price: 250 };
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function distance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function loadProfile() {
+  try {
+    return { ...createDefaultProfile(), ...JSON.parse(localStorage.getItem(PLAYER_PROFILE_KEY)) };
+  } catch {
+    return createDefaultProfile();
+  }
+}
+
+function saveProfile(profile) {
+  localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(profile));
+}
+
+function addXp(profile, amount) {
+  profile.xp += amount;
+  let needed = xpNeeded(profile.level);
+  while (profile.xp >= needed) {
+    profile.xp -= needed;
+    profile.level += 1;
+    profile.skillPoints += 1;
+    needed = xpNeeded(profile.level);
+  }
+  saveProfile(profile);
+}
+
+function getPathPoints(level, board) {
+  return level.track.map((tile) => ({
+    x: board.x + tile.col * board.tile + board.tile / 2,
+    y: board.y + tile.row * board.tile + board.tile / 2,
+  }));
+}
+
+function createBoard(level, canvas) {
+  const availableW = canvas.width - BOARD_PAD * 2;
+  const availableH = canvas.height - BOARD_PAD * 2;
+  const tile = Math.floor(Math.min(availableW / level.cols, availableH / level.rows));
+  return {
+    tile,
+    w: tile * level.cols,
+    h: tile * level.rows,
+    x: Math.floor((canvas.width - tile * level.cols) / 2),
+    y: Math.floor((canvas.height - tile * level.rows) / 2),
+  };
+}
+
+function tileKey(row, col) {
+  return `${row}:${col}`;
+}
+
+function getTileSets(level) {
+  return {
+    path: new Set(level.track.map((tile) => tileKey(tile.row, tile.col))),
+    blockers: new Set(level.blockers.map((tile) => tileKey(tile.row, tile.col))),
+  };
+}
+
+function waveTotal(level) {
+  return level.waves.reduce((total, wave) => total + wave.spawns.length, 0);
+}
+
+function makeEnemy(spawn, state) {
+  const definition = getEnemy(spawn.enemy);
+  return {
+    id: `enemy-${state.nextEnemyId++}`,
+    key: definition.key,
+    label: definition.label,
+    shape: definition.shape,
+    color: definition.color,
+    life: definition.life,
+    maxLife: definition.life,
+    speed: definition.speed,
+    damage: definition.damage,
+    gold: definition.gold,
+    radius: definition.shape === "pentagon" ? 19 : definition.shape === "square" ? 17 : 15,
+    segment: 0,
+    progress: 0,
+    x: state.path[0].x,
+    y: state.path[0].y,
+    reachedEnd: false,
+  };
+}
+
+function createInitialState(level, profile, canvas) {
+  const board = createBoard(level, canvas);
+  return {
+    mode: "game",
+    level,
+    board,
+    tileSets: getTileSets(level),
+    path: getPathPoints(level, board),
+    profile,
+    gold: level.startGold,
+    lives: level.lives,
+    selectedWeaponKey: null,
+    towers: [],
+    enemies: [],
+    projectiles: [],
+    nextTowerId: 0,
+    nextEnemyId: 0,
+    nextProjectileId: 0,
+    waveIndex: 0,
+    waveTime: 0,
+    waveDelay: 0,
+    spawnedInWave: new Set(),
+    kills: 0,
+    totalEnemies: waveTotal(level),
+    runMode: "play",
+    gameSpeed: 1,
+    isPaused: false,
+    timeStopTimer: 0,
+    timeStopCooldown: 0,
+    result: null,
+    message: "Select a weapon, then click a free tile.",
+  };
+}
+
+function targetForTower(tower, enemies) {
+  let best = null;
+  let bestProgress = -1;
+  for (const enemy of enemies) {
+    const inRange = distance(tower, enemy) <= tower.range;
+    const progressScore = enemy.segment * 1000 + enemy.progress;
+    if (inRange && progressScore > bestProgress) {
+      best = enemy;
+      bestProgress = progressScore;
+    }
+  }
+  return best;
+}
+
+function createProjectile(state, tower, target, angleOffset = 0) {
+  const angle = Math.atan2(target.y - tower.y, target.x - tower.x) + angleOffset;
+  state.projectiles.push({
+    id: `projectile-${state.nextProjectileId++}`,
+    weaponKey: tower.weapon.key,
+    x: tower.x,
+    y: tower.y,
+    vx: Math.cos(angle) * tower.weapon.projectileSpeed,
+    vy: Math.sin(angle) * tower.weapon.projectileSpeed,
+    damage: tower.weapon.directDamage,
+    targetId: target.id,
+    life: 1.2,
+  });
+}
+
+function fireTower(state, tower, target) {
+  const pelletCount = tower.weapon.pelletCount || 1;
+  const spread = tower.weapon.spread || 0;
+  if (pelletCount === 1) {
+    createProjectile(state, tower, target);
+  } else {
+    const center = (pelletCount - 1) / 2;
+    for (let i = 0; i < pelletCount; i += 1) {
+      createProjectile(state, tower, target, (i - center) * spread);
+    }
+  }
+  tower.cooldown = 1 / tower.weapon.atkSpeed;
+  tower.ammo -= 1;
+}
+
+function updateTowers(state, dt) {
+  for (const tower of state.towers) {
+    if (tower.reloadTimer > 0) {
+      tower.reloadTimer -= dt;
+      if (tower.reloadTimer <= 0) tower.ammo = tower.weapon.capacity;
+      continue;
+    }
+    tower.cooldown = Math.max(0, tower.cooldown - dt);
+    if (tower.ammo <= 0) {
+      tower.reloadTimer = tower.weapon.reloadSpeed;
+      continue;
+    }
+    const target = targetForTower(tower, state.enemies);
+    if (target && tower.cooldown <= 0) fireTower(state, tower, target);
+  }
+}
+
+function updateEnemies(state, dt) {
+  const movementDt = state.timeStopTimer > 0 ? 0 : dt;
+  for (const enemy of state.enemies) {
+    let remaining = enemy.speed * movementDt;
+    while (remaining > 0 && enemy.segment < state.path.length - 1) {
+      const from = state.path[enemy.segment];
+      const to = state.path[enemy.segment + 1];
+      const segmentLength = distance(from, to);
+      const leftOnSegment = segmentLength - enemy.progress;
+      const step = Math.min(remaining, leftOnSegment);
+      enemy.progress += step;
+      remaining -= step;
+      const t = clamp(enemy.progress / segmentLength, 0, 1);
+      enemy.x = from.x + (to.x - from.x) * t;
+      enemy.y = from.y + (to.y - from.y) * t;
+      if (enemy.progress >= segmentLength - 0.01) {
+        enemy.segment += 1;
+        enemy.progress = 0;
+      }
+    }
+    if (enemy.segment >= state.path.length - 1) enemy.reachedEnd = true;
+  }
+
+  for (const enemy of state.enemies.filter((item) => item.reachedEnd)) {
+    state.lives -= enemy.damage;
+  }
+  state.enemies = state.enemies.filter((item) => !item.reachedEnd);
+}
+
+function updateProjectiles(state, dt) {
+  for (const projectile of state.projectiles) {
+    projectile.x += projectile.vx * dt;
+    projectile.y += projectile.vy * dt;
+    projectile.life -= dt;
+    const hit = state.enemies.find((enemy) => distance(projectile, enemy) <= enemy.radius + 4);
+    if (hit) {
+      hit.life -= projectile.damage;
+      projectile.life = 0;
+    }
+  }
+  state.projectiles = state.projectiles.filter((projectile) => projectile.life > 0);
+
+  const killed = state.enemies.filter((enemy) => enemy.life <= 0);
+  for (const enemy of killed) {
+    state.gold += enemy.gold;
+    state.kills += 1;
+    addXp(state.profile, enemy.shape === "pentagon" ? 30 : 8);
+  }
+  state.enemies = state.enemies.filter((enemy) => enemy.life > 0);
+}
+
+function updateWaves(state, dt) {
+  if (state.waveIndex >= state.level.waves.length) return;
+  if (state.waveDelay > 0) {
+    state.waveDelay -= dt;
+    return;
+  }
+  const wave = state.level.waves[state.waveIndex];
+  state.waveTime += dt;
+  wave.spawns.forEach((spawn, index) => {
+    if (state.waveTime >= spawn.at && !state.spawnedInWave.has(index)) {
+      state.enemies.push(makeEnemy(spawn, state));
+      state.spawnedInWave.add(index);
+    }
+  });
+  if (state.spawnedInWave.size === wave.spawns.length && state.enemies.length === 0) {
+    state.waveIndex += 1;
+    state.waveTime = 0;
+    state.spawnedInWave = new Set();
+    state.waveDelay = NEXT_WAVE_DELAY;
+  }
+}
+
+function updateResult(state) {
+  if (state.result) return;
+  if (state.lives <= 0) {
+    state.result = "defeat";
+    state.isPaused = true;
+  } else if (state.waveIndex >= state.level.waves.length && state.enemies.length === 0) {
+    state.result = "victory";
+    state.isPaused = true;
+    addXp(state.profile, 35);
+  }
+}
+
+function stepState(state, dt) {
+  state.timeStopTimer = Math.max(0, state.timeStopTimer - dt);
+  state.timeStopCooldown = Math.max(0, state.timeStopCooldown - dt);
+  if (state.isPaused || state.result) return;
+  const scaledDt = dt * state.gameSpeed;
+  updateWaves(state, scaledDt);
+  updateTowers(state, scaledDt);
+  updateProjectiles(state, scaledDt);
+  updateEnemies(state, scaledDt);
+  updateResult(state);
+}
+
+function drawRoundedRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawAlien(ctx, enemy) {
+  ctx.save();
+  ctx.translate(enemy.x, enemy.y);
+  ctx.fillStyle = enemy.color;
+  ctx.strokeStyle = "rgba(255,255,255,0.72)";
+  ctx.lineWidth = 2;
+  const sides = { circle: 36, triangle: 3, square: 4, pentagon: 5 }[enemy.shape] || 36;
+  ctx.beginPath();
+  for (let i = 0; i < sides; i += 1) {
+    const angle = -Math.PI / 2 + (i / sides) * TWO_PI;
+    const r = enemy.radius;
+    const x = Math.cos(angle) * r;
+    const y = Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#071014";
+  ctx.beginPath();
+  ctx.arc(-5, -3, 2.5, 0, TWO_PI);
+  ctx.arc(5, -3, 2.5, 0, TWO_PI);
+  ctx.fill();
+  const hpW = enemy.radius * 2;
+  ctx.fillStyle = "rgba(7,12,16,0.72)";
+  ctx.fillRect(-hpW / 2, -enemy.radius - 11, hpW, 4);
+  ctx.fillStyle = "#8dff72";
+  ctx.fillRect(-hpW / 2, -enemy.radius - 11, hpW * clamp(enemy.life / enemy.maxLife, 0, 1), 4);
+  ctx.restore();
+}
+
+function drawTower(ctx, tower) {
+  ctx.save();
+  ctx.translate(tower.x, tower.y);
+  ctx.fillStyle = "rgba(3,8,12,0.9)";
+  ctx.strokeStyle = tower.weapon.accent;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(0, 0, 22, 0, TWO_PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.rotate(tower.angle || 0);
+  ctx.fillStyle = tower.weapon.accent;
+  ctx.fillRect(0, -5, 28, 10);
+  ctx.fillStyle = "#dce8ec";
+  ctx.fillRect(-7, -7, 15, 14);
+  ctx.restore();
+}
+
+function drawGame(ctx, state) {
+  const { board, level, tileSets } = state;
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  const bg = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+  bg.addColorStop(0, "#15242c");
+  bg.addColorStop(1, "#070b10");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  ctx.fillStyle = "#0d151b";
+  ctx.strokeStyle = "rgba(91, 206, 255, 0.22)";
+  ctx.lineWidth = 4;
+  drawRoundedRect(ctx, board.x - 14, board.y - 14, board.w + 28, board.h + 28, 18);
+
+  for (let row = 0; row < level.rows; row += 1) {
+    for (let col = 0; col < level.cols; col += 1) {
+      const x = board.x + col * board.tile;
+      const y = board.y + row * board.tile;
+      const key = tileKey(row, col);
+      const isPath = tileSets.path.has(key);
+      const isBlocked = tileSets.blockers.has(key);
+      ctx.fillStyle = isPath ? "#6b543b" : isBlocked ? "#1a2026" : "#193241";
+      ctx.fillRect(x + 2, y + 2, board.tile - 4, board.tile - 4);
+      ctx.strokeStyle = isPath ? "rgba(247, 163, 69, 0.38)" : "rgba(90, 205, 255, 0.18)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 2.5, y + 2.5, board.tile - 5, board.tile - 5);
+      if (isBlocked) {
+        ctx.fillStyle = "rgba(255,255,255,0.08)";
+        ctx.fillRect(x + 18, y + 18, board.tile - 36, board.tile - 36);
+      }
+    }
+  }
+
+  ctx.strokeStyle = "rgba(255, 176, 71, 0.85)";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  state.path.forEach((point, index) => (index === 0 ? ctx.moveTo(point.x, point.y) : ctx.lineTo(point.x, point.y)));
+  ctx.stroke();
+
+  const selected = weapons.find((weapon) => weapon.key === state.selectedWeaponKey);
+  if (selected) {
+    ctx.fillStyle = "rgba(120, 226, 127, 0.12)";
+    for (let row = 0; row < level.rows; row += 1) {
+      for (let col = 0; col < level.cols; col += 1) {
+        const key = tileKey(row, col);
+        const occupied = state.towers.some((tower) => tower.row === row && tower.col === col);
+        if (!tileSets.path.has(key) && !tileSets.blockers.has(key) && !occupied) {
+          ctx.fillRect(board.x + col * board.tile + 7, board.y + row * board.tile + 7, board.tile - 14, board.tile - 14);
+        }
+      }
+    }
+  }
+
+  state.towers.forEach((tower) => {
+    const target = targetForTower(tower, state.enemies);
+    if (target) tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
+    drawTower(ctx, tower);
+  });
+
+  state.projectiles.forEach((projectile) => {
+    ctx.fillStyle = "#ffe57c";
+    ctx.beginPath();
+    ctx.arc(projectile.x, projectile.y, 4, 0, TWO_PI);
+    ctx.fill();
+  });
+
+  state.enemies.forEach((enemy) => drawAlien(ctx, enemy));
+
+  if (state.timeStopTimer > 0) {
+    ctx.fillStyle = "rgba(116, 220, 255, 0.12)";
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = "rgba(230, 251, 255, 0.84)";
+    ctx.font = "700 30px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("TIME STOP", ctx.canvas.width / 2, 54);
+  }
+}
+
+export function createGame({ ui, levels }) {
+  const ctx = ui.canvas.getContext("2d");
+  let profile = loadProfile();
+  let selectedLevel = levels[0];
+  let state = null;
+  let lastTime = performance.now();
+
+  function syncMenu() {
+    ui.levelGrid.innerHTML = levels.map((level, index) => `
+      <button class="level-tile ${selectedLevel?.id === level.id ? "selected" : ""}" data-level-id="${level.id}" type="button">
+        <strong>${index + 1}</strong>
+        <span>${level.name}</span>
+      </button>
+    `).join("");
+    ui.menuPlayButton.disabled = !selectedLevel;
+  }
+
+  function syncHud() {
+    if (!state) return;
+    ui.livesValue.textContent = Math.max(0, state.lives);
+    ui.goldValue.textContent = state.gold;
+    ui.playerLevelValue.textContent = profile.level;
+    ui.playerXpBar.style.width = `${Math.round((profile.xp / xpNeeded(profile.level)) * 100)}%`;
+    ui.levelNameValue.textContent = state.level.name;
+    ui.waveValue.textContent = `${Math.min(state.waveIndex + 1, state.level.waves.length)} / ${state.level.waves.length}`;
+    ui.killsValue.textContent = `${state.kills} / ${state.totalEnemies}`;
+    ui.speedControl.textContent = state.isPaused ? "Play" : state.gameSpeed === 2 ? "2x" : "Pause";
+    ui.speedControl.className = `control-button speed-state ${state.isPaused ? "paused" : state.gameSpeed === 2 ? "fast" : "running"}`;
+    const ready = state.timeStopCooldown <= 0 && state.timeStopTimer <= 0;
+    ui.timeStopButton.disabled = !ready;
+    ui.timeStopStatus.textContent = state.timeStopTimer > 0
+      ? `${state.timeStopTimer.toFixed(1)}s`
+      : state.timeStopCooldown > 0
+        ? `${state.timeStopCooldown.toFixed(1)}s`
+        : "Ready";
+    ui.weaponBar.querySelectorAll(".weapon-card").forEach((button) => {
+      const weapon = weapons.find((item) => item.key === button.dataset.weaponKey);
+      button.classList.toggle("selected", state.selectedWeaponKey === weapon.key);
+      button.disabled = state.gold < weapon.price;
+    });
+  }
+
+  function renderWeaponBar() {
+    ui.weaponBar.innerHTML = weapons.map((weapon, index) => `
+      <button class="weapon-card" data-weapon-key="${weapon.key}" type="button">
+        <span class="slot-label">Slot ${index + 1}</span>
+        <i style="--weapon-accent: ${weapon.accent}"></i>
+        <strong>${weapon.name}</strong>
+        <small>${weapon.price}g</small>
+      </button>
+    `).join("");
+  }
+
+  function startLevel(level) {
+    selectedLevel = level;
+    profile = loadProfile();
+    state = createInitialState(level, profile, ui.canvas);
+    ui.mainMenu.classList.add("hidden");
+    ui.gameScreen.classList.remove("hidden");
+    ui.pauseModal.classList.add("hidden");
+    ui.resultModal.classList.add("hidden");
+    renderWeaponBar();
+    syncHud();
+  }
+
+  function openMenu() {
+    ui.gameScreen.classList.add("hidden");
+    ui.mainMenu.classList.remove("hidden");
+    ui.pauseModal.classList.add("hidden");
+    ui.resultModal.classList.add("hidden");
+    syncMenu();
+  }
+
+  function tryPlaceTower(row, col) {
+    if (!state?.selectedWeaponKey) return;
+    const weapon = weapons.find((item) => item.key === state.selectedWeaponKey);
+    const key = tileKey(row, col);
+    const occupied = state.towers.some((tower) => tower.row === row && tower.col === col);
+    if (state.gold < weapon.price || state.tileSets.path.has(key) || state.tileSets.blockers.has(key) || occupied) return;
+    state.gold -= weapon.price;
+    state.towers.push({
+      id: `tower-${state.nextTowerId++}`,
+      weapon,
+      row,
+      col,
+      x: state.board.x + col * state.board.tile + state.board.tile / 2,
+      y: state.board.y + row * state.board.tile + state.board.tile / 2,
+      range: weapon.range,
+      cooldown: 0,
+      ammo: weapon.capacity,
+      reloadTimer: 0,
+      angle: 0,
+    });
+  }
+
+  function showResult() {
+    if (!state?.result) return;
+    ui.resultTitle.textContent = state.result === "victory" ? "Mission Complete" : "Base Overrun";
+    ui.resultCopy.textContent = state.result === "victory"
+      ? `Cleared ${state.level.name} with ${Math.max(0, state.lives)} lives left.`
+      : `The aliens breached ${state.level.name}.`;
+    ui.resultModal.classList.remove("hidden");
+  }
+
+  ui.levelGrid.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-level-id]");
+    if (!button) return;
+    selectedLevel = levels.find((level) => level.id === button.dataset.levelId);
+    syncMenu();
+  });
+
+  ui.menuPlayButton.addEventListener("click", () => startLevel(selectedLevel));
+
+  ui.weaponBar.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-weapon-key]");
+    if (!button || button.disabled) return;
+    state.selectedWeaponKey = state.selectedWeaponKey === button.dataset.weaponKey ? null : button.dataset.weaponKey;
+    syncHud();
+  });
+
+  ui.canvas.addEventListener("click", (event) => {
+    if (!state) return;
+    const rect = ui.canvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * ui.canvas.width;
+    const y = ((event.clientY - rect.top) / rect.height) * ui.canvas.height;
+    const col = Math.floor((x - state.board.x) / state.board.tile);
+    const row = Math.floor((y - state.board.y) / state.board.tile);
+    if (row >= 0 && row < state.level.rows && col >= 0 && col < state.level.cols) tryPlaceTower(row, col);
+  });
+
+  ui.speedControl.addEventListener("click", () => {
+    if (!state) return;
+    if (!state.isPaused && state.gameSpeed === 1) state.gameSpeed = 2;
+    else if (!state.isPaused && state.gameSpeed === 2) state.isPaused = true;
+    else {
+      state.isPaused = false;
+      state.gameSpeed = 1;
+    }
+    syncHud();
+  });
+
+  ui.gearButton.addEventListener("click", () => {
+    if (!state) return;
+    state.isPaused = true;
+    ui.pauseModal.classList.remove("hidden");
+    syncHud();
+  });
+  ui.resumeButton.addEventListener("click", () => {
+    state.isPaused = false;
+    ui.pauseModal.classList.add("hidden");
+    syncHud();
+  });
+  ui.restartButton.addEventListener("click", () => startLevel(state.level));
+  ui.changeLevelButton.addEventListener("click", openMenu);
+  ui.resultRestartButton.addEventListener("click", () => startLevel(state.level));
+  ui.resultLevelsButton.addEventListener("click", openMenu);
+
+  ui.timeStopButton.addEventListener("click", () => {
+    if (!state || state.timeStopCooldown > 0 || state.timeStopTimer > 0) return;
+    state.timeStopTimer = TIME_STOP.duration;
+    state.timeStopCooldown = TIME_STOP.cooldown;
+  });
+
+  window.render_game_to_text = () => JSON.stringify({
+    mode: ui.mainMenu.classList.contains("hidden") ? "game" : "menu",
+    coordinateSystem: "canvas origin top-left, x right, y down",
+    selectedLevel: selectedLevel?.id,
+    level: state?.level?.id,
+    lives: state?.lives,
+    gold: state?.gold,
+    player: { level: profile.level, xp: profile.xp, skillPoints: profile.skillPoints },
+    wave: state ? `${Math.min(state.waveIndex + 1, state.level.waves.length)}/${state.level.waves.length}` : null,
+    kills: state ? `${state.kills}/${state.totalEnemies}` : null,
+    selectedWeapon: state?.selectedWeaponKey,
+    towers: state?.towers.map((tower) => ({ weapon: tower.weapon.key, row: tower.row, col: tower.col, ammo: tower.ammo })) || [],
+    enemies: state?.enemies.map((enemy) => ({ key: enemy.key, x: Math.round(enemy.x), y: Math.round(enemy.y), life: Math.round(enemy.life) })) || [],
+    result: state?.result,
+  });
+
+  window.advanceTime = (ms) => {
+    if (!state) return;
+    const steps = Math.max(1, Math.round(ms / (1000 / 60)));
+    for (let i = 0; i < steps; i += 1) stepState(state, 1 / 60);
+    drawGame(ctx, state);
+    syncHud();
+    showResult();
+  };
+
+  function frame(now) {
+    const dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+    if (state) {
+      stepState(state, dt);
+      drawGame(ctx, state);
+      syncHud();
+      showResult();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  syncMenu();
+  requestAnimationFrame(frame);
+}

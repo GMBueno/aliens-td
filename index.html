@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alien Armory Defense</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="main-menu" id="main-menu">
+        <div class="menu-card">
+          <div class="menu-head">
+            <p>Alien Armory Defense</p>
+            <h1>Select Level</h1>
+          </div>
+          <div class="level-grid" id="level-grid"></div>
+          <button class="primary-button" id="menu-play-button" type="button" disabled>Play</button>
+        </div>
+      </section>
+
+      <section class="game-screen hidden" id="game-screen">
+        <header class="hud hud-top">
+          <div class="hud-group">
+            <div class="hud-chip" title="Lives"><span class="icon heart"></span><strong id="lives-value">0</strong></div>
+            <div class="hud-chip" title="Gold"><span class="coin"></span><strong id="gold-value">0</strong></div>
+            <button class="hud-chip player-chip" id="player-level-button" type="button">
+              <span>LVL</span>
+              <strong id="player-level-value">1</strong>
+              <i id="player-xp-bar"></i>
+            </button>
+          </div>
+          <div class="hud-group center">
+            <div class="hud-chip wide"><span>LEVEL</span><strong id="level-name-value">Level One</strong></div>
+            <div class="hud-chip"><span>WAVE</span><strong id="wave-value">0 / 0</strong></div>
+            <div class="hud-chip"><span class="skull"></span><strong id="kills-value">0 / 0</strong></div>
+          </div>
+          <div class="hud-group">
+            <button class="control-button speed-state running" id="speed-control" type="button" title="Pause / Play / 2x">Pause</button>
+            <button class="control-button gear-button" id="gear-button" type="button" title="Menu">Gear</button>
+          </div>
+        </header>
+
+        <section class="arena-wrap">
+          <canvas id="game-canvas" width="1280" height="720"></canvas>
+        </section>
+
+        <footer class="hud hud-bottom">
+          <button class="ability-card" id="time-stop-button" type="button">
+            <span class="hourglass"></span>
+            <strong>Time Stop</strong>
+            <small id="time-stop-status">Ready</small>
+          </button>
+          <div class="weapon-bar" id="weapon-bar"></div>
+        </footer>
+      </section>
+
+      <section class="modal-backdrop hidden" id="pause-modal">
+        <div class="pause-card">
+          <p>Command Menu</p>
+          <button class="primary-button" id="resume-button" type="button">Resume</button>
+          <button class="secondary-button" id="restart-button" type="button">Restart</button>
+          <button class="secondary-button" id="change-level-button" type="button">Change Level</button>
+        </div>
+      </section>
+
+      <section class="modal-backdrop hidden" id="result-modal">
+        <div class="pause-card">
+          <p id="result-title">Mission Complete</p>
+          <span id="result-copy"></span>
+          <button class="primary-button" id="result-restart-button" type="button">Restart</button>
+          <button class="secondary-button" id="result-levels-button" type="button">Change Level</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

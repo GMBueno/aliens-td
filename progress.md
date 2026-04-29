@@ -1,0 +1,33 @@
+Original prompt: using @game-studio create a simple top-down alien-themed tower defense MVP like Bloons Tower Defense, with shape placeholder enemies, six weapon slots, separate data files for enemies/weapons/levels, a 3x3 level-select menu, in-game HUD, waves, persistent player level, pause/menu controls, and a Time Stop ability.
+
+- Implemented a static browser MVP with HTML, CSS, and canvas-based ES modules.
+- Active entry points:
+  `index.html`,
+  `styles.css`,
+  `src/main.js`,
+  `src/game.js`.
+- Tuning data is split into:
+  `src/data/enemies.js`,
+  `src/data/weapons.js`,
+  `src/data/player.js`,
+  `src/data/levelFactory.js`,
+  and `src/data/levels/level1.js` through `level9.js`.
+- Gameplay currently includes:
+  a 3x3 level selector,
+  six fixed weapon slots,
+  tile path/build/blocker rules,
+  waves and enemy leaks,
+  gold rewards,
+  persistent player XP/level,
+  projectile towers with ammo/reload,
+  pause/play/2x,
+  gear menu,
+  restart/change-level actions,
+  victory/defeat modal,
+  Time Stop duration/cooldown,
+  and `window.render_game_to_text` plus `window.advanceTime(ms)` for testing.
+
+TODO
+- Replace canvas/CSS placeholder art with isolated or provided image assets.
+- Add the later skill tree/proficiency screen from the player-level button.
+- Balance levels and weapon numbers after a few real play sessions.
