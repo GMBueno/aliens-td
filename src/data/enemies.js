@@ -1,3 +1,5 @@
+import { assets } from "./assets.js";
+
 export const enemies = {
   alien_normal: {
     key: "alien_normal",
@@ -8,7 +10,7 @@ export const enemies = {
     gold: 12,
     shape: "circle",
     color: "#4de0a8",
-    asset: "assets/aliens/basic.png",
+    asset: assets.aliens.basic,
     visualSize: 58,
   },
   alien_fast: {
@@ -20,7 +22,7 @@ export const enemies = {
     gold: 14,
     shape: "triangle",
     color: "#7bc8ff",
-    asset: "assets/aliens/fast.png",
+    asset: assets.aliens.fast,
     visualSize: 62,
   },
   alien_tank: {
@@ -32,7 +34,7 @@ export const enemies = {
     gold: 28,
     shape: "square",
     color: "#f5b447",
-    asset: "assets/aliens/tank.png",
+    asset: assets.aliens.tank,
     visualSize: 76,
   },
   alien_boss: {
@@ -44,7 +46,7 @@ export const enemies = {
     gold: 120,
     shape: "pentagon",
     color: "#e96dff",
-    asset: "assets/aliens/boss.png",
+    asset: assets.aliens.boss,
     visualSize: 88,
   },
 };

@@ -196,17 +196,22 @@ button:disabled {
 }
 
 .hud-chip {
-  min-width: 78px;
-  min-height: 50px;
+  --hud-chip-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 22%), var(--panel-2);
+  min-width: 96px;
+  min-height: 52px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  padding: 8px 12px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 0;
+  background: var(--hud-chip-bg) center / 100% 100% no-repeat;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
 }
 
 .hud-chip.wide {
-  min-width: min(260px, 28vw);
+  min-width: min(250px, 22vw);
 }
 
 .hud-chip span {
@@ -219,6 +224,63 @@ button:disabled {
 
 .hud-chip strong {
   font-size: 1.2rem;
+  color: #f6efe0;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.85);
+}
+
+.lives-chip {
+  --hud-chip-bg: var(--hud-lives-plaque);
+  min-width: 100px;
+  justify-content: flex-end;
+  padding-left: 44px;
+  padding-right: 22px;
+}
+
+.gold-chip {
+  --hud-chip-bg: var(--hud-gold-plaque);
+  min-width: 106px;
+  justify-content: flex-end;
+  padding-left: 44px;
+  padding-right: 22px;
+}
+
+.player-chip {
+  --hud-chip-bg: var(--hud-player-plaque);
+  min-width: min(214px, 20vw);
+  justify-content: flex-start;
+  padding-left: 64px;
+  padding-right: 18px;
+}
+
+.mission-chip {
+  --hud-chip-bg: var(--hud-mission-plaque);
+  justify-content: center;
+  padding-left: 78px;
+}
+
+.wave-chip {
+  --hud-chip-bg: var(--hud-wave-plaque);
+  min-width: 104px;
+  justify-content: flex-end;
+  padding-left: 44px;
+  padding-right: 18px;
+}
+
+.kills-chip {
+  --hud-chip-bg: var(--hud-kills-plaque);
+  min-width: 104px;
+  justify-content: flex-end;
+  padding-left: 44px;
+  padding-right: 18px;
+}
+
+.hud-top .lives-chip .heart,
+.hud-top .gold-chip .coin,
+.hud-top .kills-chip .skull,
+.hud-top .player-chip span,
+.hud-top .mission-chip span,
+.hud-top .wave-chip span {
+  display: none;
 }
 
 .player-chip {
@@ -230,12 +292,12 @@ button:disabled {
 
 .player-chip i {
   position: absolute;
-  left: 8px;
-  bottom: 6px;
+  left: 92px;
+  bottom: 17px;
   width: var(--xp-progress, 0%);
-  max-width: calc(100% - 16px);
-  height: 5px;
-  border-radius: 99px;
+  max-width: calc(100% - 112px);
+  height: 8px;
+  border-radius: 2px;
   background: var(--green);
 }
 
@@ -310,16 +372,24 @@ button:disabled {
 }
 
 .control-button {
-  min-width: 70px;
+  min-width: 66px;
+  min-height: 48px;
   padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  color: #f6efe0;
+  background: var(--hud-speed-plaque) center / 100% 100% no-repeat;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.85);
 }
 
 .icon-control {
-  min-width: 56px;
+  min-width: 72px;
   display: inline-grid;
   place-items: center;
   color: transparent;
   position: relative;
+  background-image: var(--hud-play-button);
 }
 
 .icon-control::before,
@@ -358,23 +428,18 @@ button:disabled {
 }
 
 .speed-state.fast {
-  border-color: var(--green);
+  filter: saturate(1.22) brightness(1.08);
 }
 
 .gear-button {
   color: transparent;
-  width: 56px;
+  width: 108px;
   position: relative;
+  background-image: var(--hud-menu-button);
 }
 
 .gear-button::before {
-  content: "⚙";
-  color: var(--text);
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: 1.3rem;
+  content: none;
 }
 
 .arena-wrap {
@@ -484,7 +549,7 @@ button:disabled {
   border-radius: 0;
   padding: 4px 12px 5px;
   color: #f7ffe8;
-  background: url("assets/slots/ui/price-plaque.png") center / 100% 100% no-repeat;
+  background: var(--slot-price-plaque) center / 100% 100% no-repeat;
   text-shadow: 0 2px 3px rgba(0, 0, 0, 0.82);
 }
 

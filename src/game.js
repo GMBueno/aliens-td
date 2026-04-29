@@ -1,15 +1,12 @@
 import { enemies, getEnemy } from "./data/enemies.js";
 import { weapons } from "./data/weapons.js";
 import { PLAYER_PROFILE_KEY, createDefaultProfile, xpNeeded } from "./data/player.js";
+import { assets as assetPaths } from "./data/assets.js";
 
 const TWO_PI = Math.PI * 2;
 const BOARD_PAD = 34;
 const NEXT_WAVE_DELAY = 2.2;
 const TIME_STOP = { duration: 4, cooldown: 18, price: 250 };
-const ASSET_SOURCES = {
-  tile: "assets/tiles/metal-floor.png",
-  placedBase: "assets/placed-towers/base-a.png",
-};
 let audioContext = null;
 
 function loadImage(src) {
@@ -31,10 +28,10 @@ function createAssetStore() {
     loaded: false,
   };
   Promise.all([
-    loadImage(ASSET_SOURCES.tile).then((image) => {
+    loadImage(assetPaths.board.tile).then((image) => {
       store.tile = image;
     }),
-    loadImage(ASSET_SOURCES.placedBase).then((image) => {
+    loadImage(assetPaths.placedTowers.base).then((image) => {
       store.placedBase = image;
     }),
     ...weapons.map((weapon) => loadImage(weapon.asset).then((image) => {
@@ -50,6 +47,26 @@ function createAssetStore() {
     store.loaded = true;
   });
   return store;
+}
+
+function cssUrl(src) {
+  return `url("${src}")`;
+}
+
+function applyAssetCssVariables(root) {
+  const vars = {
+    "--hud-lives-plaque": assetPaths.hud.livesPlaque,
+    "--hud-gold-plaque": assetPaths.hud.goldPlaque,
+    "--hud-player-plaque": assetPaths.hud.playerPlaque,
+    "--hud-mission-plaque": assetPaths.hud.missionPlaque,
+    "--hud-wave-plaque": assetPaths.hud.wavePlaque,
+    "--hud-kills-plaque": assetPaths.hud.killsPlaque,
+    "--hud-play-button": assetPaths.hud.playButton,
+    "--hud-menu-button": assetPaths.hud.menuButton,
+    "--hud-speed-plaque": assetPaths.hud.speedPlaque,
+    "--slot-price-plaque": assetPaths.slots.pricePlaque,
+  };
+  Object.entries(vars).forEach(([name, src]) => root.style.setProperty(name, cssUrl(src)));
 }
 
 function clamp(value, min, max) {
@@ -678,6 +695,7 @@ function drawGame(ctx, state, assets) {
 export function createGame({ ui, levels }) {
   const ctx = ui.canvas.getContext("2d");
   const assets = createAssetStore();
+  applyAssetCssVariables(document.documentElement);
   let profile = loadProfile();
   let selectedLevel = levels[0];
   let state = null;

@@ -27,3 +27,9 @@ python3 -m http.server 4181
 ```
 
 Then open http://localhost:4181.
+
+## Swapping Art
+
+Most runtime asset paths are centralized in `src/data/assets.js`.
+
+To change visuals later, either replace the PNG at the existing path or update the matching entry in that file. The current asset groups cover board tiles, upper HUD plaques/buttons, alien sprites, placed tower parts, lower HUD slot cards, lower HUD weapon art, and price plaques.

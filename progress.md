@@ -85,3 +85,8 @@ TODO
   cropped slots.png into empty card frames, lower-HUD weapon art, and a price plaque under assets/slots/;
   lower HUD weapon cards now use the slots.png card/frame, weapon-on-base art, and gold plaque while placed turrets remain on weapons_base.png top-down assets;
   verified with Playwright screenshots and no console errors.
+
+- Upper HUD asset pass:
+  cropped the high-resolution hud.png sheet into assets/hud/ plaque and button textures;
+  added src/data/assets.js as the central manifest for board, HUD, alien, placed tower, lower slot, and card art paths so future visual swaps are localized;
+  updated the upper HUD to use the cropped plaque/button textures while preserving live values and controls.
