@@ -21,6 +21,7 @@ function loadImage(src) {
 function createAssetStore() {
   const store = {
     tile: null,
+    path: null,
     placedBase: null,
     placedWeapons: {},
     enemies: {},
@@ -30,6 +31,9 @@ function createAssetStore() {
   Promise.all([
     loadImage(assetPaths.board.tile).then((image) => {
       store.tile = image;
+    }),
+    loadImage(assetPaths.board.path).then((image) => {
+      store.path = image;
     }),
     loadImage(assetPaths.placedTowers.base).then((image) => {
       store.placedBase = image;
@@ -612,7 +616,9 @@ function drawGame(ctx, state, assets) {
       const key = tileKey(row, col);
       const isPath = tileSets.path.has(key);
       const isBlocked = tileSets.blockers.has(key);
-      if (!isPath && assets.tile) {
+      if (isPath && assets.path) {
+        ctx.drawImage(assets.path, x + 1, y + 1, board.tile - 2, board.tile - 2);
+      } else if (!isPath && assets.tile) {
         ctx.drawImage(assets.tile, x + 1, y + 1, board.tile - 2, board.tile - 2);
         if (isBlocked) {
           ctx.fillStyle = "rgba(0, 0, 0, 0.46)";
@@ -632,11 +638,13 @@ function drawGame(ctx, state, assets) {
     }
   }
 
-  ctx.strokeStyle = "rgba(255, 176, 71, 0.85)";
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  state.path.forEach((point, index) => (index === 0 ? ctx.moveTo(point.x, point.y) : ctx.lineTo(point.x, point.y)));
-  ctx.stroke();
+  if (!assets.path) {
+    ctx.strokeStyle = "rgba(255, 176, 71, 0.85)";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    state.path.forEach((point, index) => (index === 0 ? ctx.moveTo(point.x, point.y) : ctx.lineTo(point.x, point.y)));
+    ctx.stroke();
+  }
 
   const selected = weapons.find((weapon) => weapon.key === state.selectedWeaponKey);
   if (selected) {

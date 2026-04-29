@@ -90,3 +90,8 @@ TODO
   cropped the high-resolution hud.png sheet into assets/hud/ plaque and button textures;
   added src/data/assets.js as the central manifest for board, HUD, alien, placed tower, lower slot, and card art paths so future visual swaps are localized;
   updated the upper HUD to use the cropped plaque/button textures while preserving live values and controls.
+
+- Path texture pass:
+  moved path.png into assets/tiles/path.png;
+  added board.path to src/data/assets.js;
+  path tiles now draw the dirt texture instead of the procedural brown fill, with the old orange route line kept only as a missing-asset fallback.

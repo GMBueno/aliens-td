@@ -1,6 +1,7 @@
 export const assets = {
   board: {
     tile: "assets/tiles/metal-floor.png",
+    path: "assets/tiles/path.png",
   },
   hud: {
     livesPlaque: "assets/hud/lives-plaque.png",
