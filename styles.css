@@ -475,6 +475,19 @@ button:disabled {
   font-weight: 900;
 }
 
+.weapon-card small {
+  min-width: min(92px, 72%);
+  min-height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  padding: 4px 12px 5px;
+  color: #f7ffe8;
+  background: url("assets/slots/ui/price-plaque.png") center / 100% 100% no-repeat;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.82);
+}
+
 .weapon-bar {
   min-width: 0;
   display: grid;
@@ -485,14 +498,20 @@ button:disabled {
 .weapon-card {
   position: relative;
   min-width: 0;
-  min-height: 112px;
+  min-height: 136px;
   color: var(--text);
   display: grid;
-  grid-template-rows: auto 1fr auto auto;
+  grid-template-rows: 18px minmax(62px, 1fr) auto auto;
   justify-items: center;
-  gap: 4px;
-  padding: 8px;
+  gap: 2px;
+  padding: 10px 12px 11px;
   cursor: pointer;
+  overflow: hidden;
+  border: 0;
+  background:
+    linear-gradient(rgba(2, 8, 12, 0.08), rgba(2, 8, 12, 0.08)),
+    var(--slot-card-image) center / 100% 100% no-repeat;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
 }
 
 .weapon-card.unaffordable {
@@ -533,28 +552,29 @@ button:disabled {
 
 .slot-label {
   justify-self: start;
-  color: var(--muted);
+  color: transparent;
   font-size: 0.67rem;
   text-transform: uppercase;
   font-weight: 900;
 }
 
-.weapon-card i {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background:
-    linear-gradient(90deg, transparent 46%, var(--weapon-accent) 47% 100%),
-    radial-gradient(circle, #e7f7ff 0 19%, #18232b 20% 100%);
-  border: 2px solid var(--weapon-accent);
+.weapon-art {
+  align-self: center;
+  width: min(120px, 94%);
+  height: 68px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 7px rgba(0, 0, 0, 0.48));
+  pointer-events: none;
 }
 
 .weapon-card strong {
   min-width: 0;
   max-width: 100%;
-  font-size: clamp(0.7rem, 1.5vw, 0.95rem);
+  font-size: clamp(0.66rem, 1.25vw, 0.88rem);
   text-align: center;
   line-height: 1.05;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.88);
+  text-transform: uppercase;
 }
 
 .modal-backdrop {
@@ -653,14 +673,12 @@ button:disabled {
   background: rgba(255, 255, 255, 0.035);
 }
 
-.inventory-slot i {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background:
-    linear-gradient(90deg, transparent 46%, var(--weapon-accent) 47% 100%),
-    radial-gradient(circle, #e7f7ff 0 19%, #18232b 20% 100%);
-  border: 2px solid var(--weapon-accent);
+.inventory-art {
+  width: min(78px, 86%);
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 7px rgba(0, 0, 0, 0.5));
+  pointer-events: none;
 }
 
 .inventory-slot span {
@@ -756,7 +774,7 @@ button:disabled {
   }
 
   .weapon-card {
-    min-height: 104px;
+    min-height: 126px;
   }
 
   .weapon-info-body {

@@ -1,4 +1,4 @@
-import { getEnemy } from "./data/enemies.js";
+import { enemies, getEnemy } from "./data/enemies.js";
 import { weapons } from "./data/weapons.js";
 import { PLAYER_PROFILE_KEY, createDefaultProfile, xpNeeded } from "./data/player.js";
 
@@ -6,7 +6,51 @@ const TWO_PI = Math.PI * 2;
 const BOARD_PAD = 34;
 const NEXT_WAVE_DELAY = 2.2;
 const TIME_STOP = { duration: 4, cooldown: 18, price: 250 };
+const ASSET_SOURCES = {
+  tile: "assets/tiles/metal-floor.png",
+  placedBase: "assets/placed-towers/base-a.png",
+};
 let audioContext = null;
+
+function loadImage(src) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => resolve(null);
+    image.src = src;
+  });
+}
+
+function createAssetStore() {
+  const store = {
+    tile: null,
+    placedBase: null,
+    placedWeapons: {},
+    enemies: {},
+    towers: {},
+    loaded: false,
+  };
+  Promise.all([
+    loadImage(ASSET_SOURCES.tile).then((image) => {
+      store.tile = image;
+    }),
+    loadImage(ASSET_SOURCES.placedBase).then((image) => {
+      store.placedBase = image;
+    }),
+    ...weapons.map((weapon) => loadImage(weapon.asset).then((image) => {
+      store.towers[weapon.key] = image;
+    })),
+    ...weapons.map((weapon) => loadImage(weapon.placedAsset).then((image) => {
+      store.placedWeapons[weapon.key] = image;
+    })),
+    ...Object.values(enemies).map((enemy) => loadImage(enemy.asset).then((image) => {
+      store.enemies[enemy.key] = image;
+    })),
+  ]).then(() => {
+    store.loaded = true;
+  });
+  return store;
+}
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -135,6 +179,8 @@ function makeEnemy(spawn, state) {
     speed: definition.speed,
     damage: definition.damage,
     gold: definition.gold,
+    asset: definition.asset,
+    visualSize: definition.visualSize,
     radius: definition.shape === "pentagon" ? 19 : definition.shape === "square" ? 17 : 15,
     segment: 0,
     progress: 0,
@@ -347,7 +393,7 @@ function drawRoundedRect(ctx, x, y, w, h, r) {
   ctx.stroke();
 }
 
-function drawAlien(ctx, enemy) {
+function drawAlienFallback(ctx, enemy) {
   ctx.save();
   ctx.translate(enemy.x, enemy.y);
   ctx.fillStyle = enemy.color;
@@ -379,7 +425,33 @@ function drawAlien(ctx, enemy) {
   ctx.restore();
 }
 
-function drawTower(ctx, tower) {
+function drawAlien(ctx, enemy, assets) {
+  const image = assets.enemies[enemy.key];
+  if (!image) {
+    drawAlienFallback(ctx, enemy);
+    return;
+  }
+  const size = enemy.visualSize || enemy.radius * 2.6;
+  const scale = size / Math.max(image.width, image.height);
+  const w = image.width * scale;
+  const h = image.height * scale;
+  ctx.save();
+  ctx.translate(enemy.x, enemy.y);
+  ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 6;
+  ctx.drawImage(image, -w / 2, -h / 2, w, h);
+  ctx.shadowColor = "transparent";
+  const hpW = Math.max(28, size * 0.82);
+  const hpY = -h / 2 - 8;
+  ctx.fillStyle = "rgba(7,12,16,0.72)";
+  ctx.fillRect(-hpW / 2, hpY, hpW, 4);
+  ctx.fillStyle = "#8dff72";
+  ctx.fillRect(-hpW / 2, hpY, hpW * clamp(enemy.life / enemy.maxLife, 0, 1), 4);
+  ctx.restore();
+}
+
+function drawTowerFallback(ctx, tower) {
   ctx.save();
   ctx.translate(tower.x, tower.y);
   ctx.fillStyle = "rgba(3,8,12,0.9)";
@@ -397,6 +469,32 @@ function drawTower(ctx, tower) {
   ctx.restore();
 }
 
+function drawTower(ctx, tower, assets) {
+  const baseImage = assets.placedBase;
+  const weaponImage = assets.placedWeapons[tower.weapon.key];
+  if (!baseImage || !weaponImage) {
+    drawTowerFallback(ctx, tower);
+    return;
+  }
+  const baseSize = Math.min(70, tower.tile * 0.9);
+  const weaponHeight = Math.min(76, tower.tile * (tower.weapon.key === "sniper" ? 1.08 : 0.95));
+  const weaponScale = weaponHeight / weaponImage.height;
+  const weaponW = weaponImage.width * weaponScale;
+  const weaponH = weaponImage.height * weaponScale;
+  ctx.save();
+  ctx.translate(tower.x, tower.y);
+  ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 5;
+  ctx.drawImage(baseImage, -baseSize / 2, -baseSize / 2, baseSize, baseSize);
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 4;
+  ctx.rotate(tower.angle || 0);
+  ctx.rotate(-Math.PI / 2);
+  ctx.drawImage(weaponImage, -weaponW / 2, -weaponH / 2, weaponW, weaponH);
+  ctx.restore();
+}
+
 function drawRangeCircle(ctx, x, y, range, color = "rgba(116, 224, 108, 0.82)") {
   ctx.save();
   ctx.fillStyle = "rgba(116, 224, 108, 0.08)";
@@ -410,7 +508,73 @@ function drawRangeCircle(ctx, x, y, range, color = "rgba(116, 224, 108, 0.82)") 
   ctx.restore();
 }
 
-function drawGame(ctx, state) {
+function drawPlacementIndicator(ctx, board, row, col, isValid = true) {
+  const x = board.x + col * board.tile;
+  const y = board.y + row * board.tile;
+  const pad = Math.max(7, board.tile * 0.12);
+  const size = board.tile - pad * 2;
+  const edge = Math.max(8, board.tile * 0.18);
+  const midX = x + board.tile / 2;
+  const midY = y + board.tile / 2;
+  const color = isValid ? "rgba(68, 194, 255, 0.96)" : "rgba(255, 103, 125, 0.92)";
+  const glow = isValid ? "rgba(68, 194, 255, 0.42)" : "rgba(255, 103, 125, 0.34)";
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.shadowColor = glow;
+  ctx.shadowBlur = 12;
+  ctx.strokeRect(x + pad, y + pad, size, size);
+
+  ctx.lineWidth = 4;
+  const left = x + pad;
+  const right = x + board.tile - pad;
+  const top = y + pad;
+  const bottom = y + board.tile - pad;
+  [
+    [left, top + edge, left, top, left + edge, top],
+    [right - edge, top, right, top, right, top + edge],
+    [right, bottom - edge, right, bottom, right - edge, bottom],
+    [left + edge, bottom, left, bottom, left, bottom - edge],
+  ].forEach(([x1, y1, x2, y2, x3, y3]) => {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+    ctx.stroke();
+  });
+
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(midX, midY, Math.max(6, board.tile * 0.1), 0, TWO_PI);
+  ctx.moveTo(midX - edge, midY);
+  ctx.lineTo(midX - 4, midY);
+  ctx.moveTo(midX + 4, midY);
+  ctx.lineTo(midX + edge, midY);
+  ctx.moveTo(midX, midY - edge);
+  ctx.lineTo(midX, midY - 4);
+  ctx.moveTo(midX, midY + 4);
+  ctx.lineTo(midX, midY + edge);
+  ctx.stroke();
+
+  const marker = Math.max(5, board.tile * 0.08);
+  [[midX, top - 1, 0], [right + 1, midY, Math.PI / 2], [midX, bottom + 1, Math.PI], [left - 1, midY, -Math.PI / 2]].forEach(([mx, my, rotation]) => {
+    ctx.save();
+    ctx.translate(mx, my);
+    ctx.rotate(rotation);
+    ctx.beginPath();
+    ctx.moveTo(0, -marker);
+    ctx.lineTo(marker * 0.9, marker);
+    ctx.lineTo(-marker * 0.9, marker);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+function drawGame(ctx, state, assets) {
   const { board, level, tileSets } = state;
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   const bg = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
@@ -431,12 +595,20 @@ function drawGame(ctx, state) {
       const key = tileKey(row, col);
       const isPath = tileSets.path.has(key);
       const isBlocked = tileSets.blockers.has(key);
-      ctx.fillStyle = isPath ? "#6b543b" : isBlocked ? "#1a2026" : "#193241";
-      ctx.fillRect(x + 2, y + 2, board.tile - 4, board.tile - 4);
+      if (!isPath && assets.tile) {
+        ctx.drawImage(assets.tile, x + 1, y + 1, board.tile - 2, board.tile - 2);
+        if (isBlocked) {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.46)";
+          ctx.fillRect(x + 2, y + 2, board.tile - 4, board.tile - 4);
+        }
+      } else {
+        ctx.fillStyle = isPath ? "#6b543b" : isBlocked ? "#1a2026" : "#193241";
+        ctx.fillRect(x + 2, y + 2, board.tile - 4, board.tile - 4);
+      }
       ctx.strokeStyle = isPath ? "rgba(247, 163, 69, 0.38)" : "rgba(90, 205, 255, 0.18)";
       ctx.lineWidth = 1;
       ctx.strokeRect(x + 2.5, y + 2.5, board.tile - 5, board.tile - 5);
-      if (isBlocked) {
+      if (isBlocked && !assets.tile) {
         ctx.fillStyle = "rgba(255,255,255,0.08)";
         ctx.fillRect(x + 18, y + 18, board.tile - 36, board.tile - 36);
       }
@@ -468,18 +640,20 @@ function drawGame(ctx, state) {
       const x = board.x + state.hoverTile.col * board.tile + board.tile / 2;
       const y = board.y + state.hoverTile.row * board.tile + board.tile / 2;
       drawRangeCircle(ctx, x, y, selected.range, canPlace ? "rgba(116, 224, 108, 0.88)" : "rgba(255, 103, 125, 0.82)");
+      drawPlacementIndicator(ctx, board, state.hoverTile.row, state.hoverTile.col, canPlace);
     }
   }
 
   state.towers.forEach((tower) => {
     const target = targetForTower(tower, state.enemies);
     if (target) tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
-    drawTower(ctx, tower);
+    drawTower(ctx, tower, assets);
   });
 
   const inspectedTower = state.towers.find((tower) => tower.id === state.selectedTowerId);
   if (inspectedTower) {
     drawRangeCircle(ctx, inspectedTower.x, inspectedTower.y, inspectedTower.range, "rgba(91, 206, 255, 0.88)");
+    drawPlacementIndicator(ctx, board, inspectedTower.row, inspectedTower.col, true);
   }
 
   state.projectiles.forEach((projectile) => {
@@ -489,7 +663,7 @@ function drawGame(ctx, state) {
     ctx.fill();
   });
 
-  state.enemies.forEach((enemy) => drawAlien(ctx, enemy));
+  state.enemies.forEach((enemy) => drawAlien(ctx, enemy, assets));
 
   if (state.timeStopTimer > 0) {
     ctx.fillStyle = "rgba(116, 220, 255, 0.12)";
@@ -503,6 +677,7 @@ function drawGame(ctx, state) {
 
 export function createGame({ ui, levels }) {
   const ctx = ui.canvas.getContext("2d");
+  const assets = createAssetStore();
   let profile = loadProfile();
   let selectedLevel = levels[0];
   let state = null;
@@ -583,10 +758,10 @@ export function createGame({ ui, levels }) {
 
   function renderWeaponBar() {
     ui.weaponBar.innerHTML = weapons.map((weapon, index) => `
-      <article class="weapon-card" data-weapon-key="${weapon.key}">
+      <article class="weapon-card" data-weapon-key="${weapon.key}" style="--slot-card-image: url('${weapon.slotCardAsset}')">
         <button class="weapon-info-button" data-info-weapon-key="${weapon.key}" type="button" aria-label="View ${weapon.name} attributes">i</button>
         <span class="slot-label">Slot ${index + 1}</span>
-        <i style="--weapon-accent: ${weapon.accent}"></i>
+        <img class="weapon-art" src="${weapon.hudAsset}" alt="" draggable="false">
         <strong>${weapon.name}</strong>
         <small>${weapon.price}g</small>
       </article>
@@ -601,7 +776,7 @@ export function createGame({ ui, levels }) {
     ui.weaponInfoTitle.textContent = weapon.name;
     ui.weaponInventoryGrid.innerHTML = Array.from({ length: 9 }, (_, index) => index === 0
       ? `<button class="inventory-slot selected" type="button" aria-label="Selected ${weapon.name}">
-          <i style="--weapon-accent: ${weapon.accent}"></i>
+          <img class="inventory-art" src="${weapon.asset}" alt="" draggable="false">
           <span>${weapon.nickname}</span>
         </button>`
       : `<button class="inventory-slot empty" type="button" aria-label="Empty inventory slot"></button>`).join("");
@@ -654,6 +829,7 @@ export function createGame({ ui, levels }) {
       col,
       x: state.board.x + col * state.board.tile + state.board.tile / 2,
       y: state.board.y + row * state.board.tile + state.board.tile / 2,
+      tile: state.board.tile,
       range: weapon.range,
       cooldown: 0,
       ammo: weapon.capacity,
@@ -799,7 +975,7 @@ export function createGame({ ui, levels }) {
     if (!state) return;
     const steps = Math.max(1, Math.round(ms / (1000 / 60)));
     for (let i = 0; i < steps; i += 1) stepState(state, 1 / 60);
-    drawGame(ctx, state);
+    drawGame(ctx, state, assets);
     syncHud();
     showResult();
   };
@@ -809,7 +985,7 @@ export function createGame({ ui, levels }) {
     lastTime = now;
     if (state) {
       stepState(state, dt);
-      drawGame(ctx, state);
+      drawGame(ctx, state, assets);
       syncHud();
       showResult();
     }

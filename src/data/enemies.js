@@ -8,6 +8,8 @@ export const enemies = {
     gold: 12,
     shape: "circle",
     color: "#4de0a8",
+    asset: "assets/aliens/basic.png",
+    visualSize: 58,
   },
   alien_fast: {
     key: "alien_fast",
@@ -18,6 +20,8 @@ export const enemies = {
     gold: 14,
     shape: "triangle",
     color: "#7bc8ff",
+    asset: "assets/aliens/fast.png",
+    visualSize: 62,
   },
   alien_tank: {
     key: "alien_tank",
@@ -28,6 +32,8 @@ export const enemies = {
     gold: 28,
     shape: "square",
     color: "#f5b447",
+    asset: "assets/aliens/tank.png",
+    visualSize: 76,
   },
   alien_boss: {
     key: "alien_boss",
@@ -38,6 +44,8 @@ export const enemies = {
     gold: 120,
     shape: "pentagon",
     color: "#e96dff",
+    asset: "assets/aliens/boss.png",
+    visualSize: 88,
   },
 };
 

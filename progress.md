@@ -27,7 +27,7 @@ Original prompt: using @game-studio create a simple top-down alien-themed tower 
   and `window.render_game_to_text` plus `window.advanceTime(ms)` for testing.
 
 TODO
-- Replace canvas/CSS placeholder art with isolated or provided image assets.
+- Continue replacing remaining placeholder visuals with isolated or provided image assets, especially shot effects/projectiles and optional extra enemy types.
 - Add the later skill tree/proficiency screen from the player-level button.
 - Balance levels and weapon numbers after a few real play sessions.
 
@@ -61,3 +61,27 @@ TODO
 
 - Renamed the in-game level HUD chip to Mission and display missions as `1-1` through `1-9` so it does not conflict with persistent player level.
 - Simplified the first-screen selector to say Mission Selector, removed the game title eyebrow, and made mission tiles show only `1-1` through `1-9`.
+
+- Asset integration pass:
+  copied the provided metal tile into assets/tiles/metal-floor.png and HUD reference into assets/ui/hud-controls-reference.png;
+  cropped the provided turret strip into six PNGs under assets/towers/;
+  wired weapon asset paths into src/data/weapons.js;
+  updated src/game.js to preload/draw the metal tile and turret sprites on the canvas with placeholder fallback;
+  updated shop and inventory cards to show turret artwork instead of CSS placeholder icons.
+- Remaining asset TODO:
+  alien sprites, muzzle flashes, tracers/hit effects, lower HUD card art, and the fourth placement indicator still need local source files or isolated assets; the embedded chat-only sheets were not present as readable files in the workspace.
+
+- Follow-up asset polish:
+  reordered weapon slots to match the provided turret strip/reference order;
+  added a fourth-option-inspired placement/selection reticle directly in the canvas renderer for hovered build tiles and selected towers.
+
+- Placed turret asset pass:
+  added top-down crops from weapons_base.png under assets/placed-towers/;
+  board turrets now compose base A with weapon variants: handgun A, sniper C, shotgun B, AR B, magnum A, and machine pistol A;
+  shop cards still use the previous card-art turret crops.
+
+- Aliens and lower HUD asset pass:
+  cropped aliens.png into assets/aliens/ and wired current enemies to basic, fast, tank, and boss sprites;
+  cropped slots.png into empty card frames, lower-HUD weapon art, and a price plaque under assets/slots/;
+  lower HUD weapon cards now use the slots.png card/frame, weapon-on-base art, and gold plaque while placed turrets remain on weapons_base.png top-down assets;
+  verified with Playwright screenshots and no console errors.
