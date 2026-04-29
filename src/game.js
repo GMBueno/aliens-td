@@ -75,6 +75,7 @@ function applyAssetCssVariables(root) {
     "--hud-menu-button": assetPaths.hud.menuButton,
     "--hud-speed-plaque": assetPaths.hud.speedPlaque,
     "--slot-price-plaque": assetPaths.slots.pricePlaque,
+    "--time-stop-card": assetPaths.slots.timeStopCard,
   };
   Object.entries(vars).forEach(([name, src]) => root.style.setProperty(name, cssUrl(src)));
 }
@@ -213,6 +214,7 @@ function makeEnemy(spawn, state) {
     progress: 0,
     x: state.path[0].x,
     y: state.path[0].y,
+    angle: Math.atan2(state.path[1].y - state.path[0].y, state.path[1].x - state.path[0].x),
     reachedEnd: false,
   };
 }
@@ -324,6 +326,7 @@ function updateEnemies(state, dt) {
       const from = state.path[enemy.segment];
       const to = state.path[enemy.segment + 1];
       const segmentLength = distance(from, to);
+      enemy.angle = Math.atan2(to.y - from.y, to.x - from.x);
       const leftOnSegment = segmentLength - enemy.progress;
       const step = Math.min(remaining, leftOnSegment);
       enemy.progress += step;
@@ -464,10 +467,13 @@ function drawAlien(ctx, enemy, assets) {
   const h = image.height * scale;
   ctx.save();
   ctx.translate(enemy.x, enemy.y);
+  ctx.save();
+  ctx.rotate((enemy.angle || 0) - Math.PI / 2);
   ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
   ctx.shadowBlur = 10;
   ctx.shadowOffsetY = 6;
   ctx.drawImage(image, -w / 2, -h / 2, w, h);
+  ctx.restore();
   ctx.shadowColor = "transparent";
   const hpW = Math.max(28, size * 0.82);
   const hpY = -h / 2 - 8;

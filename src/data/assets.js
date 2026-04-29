@@ -34,6 +34,7 @@ export const assets = {
   },
   slots: {
     pricePlaque: "assets/slots/ui/price-plaque.png",
+    timeStopCard: "assets/slots/cards/time-stop.png",
     cards: [
       "assets/slots/cards/slot-1.png",
       "assets/slots/cards/slot-2.png",
