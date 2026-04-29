@@ -30,6 +30,13 @@ const ui = {
   resultCopy: document.querySelector("#result-copy"),
   resultRestartButton: document.querySelector("#result-restart-button"),
   resultLevelsButton: document.querySelector("#result-levels-button"),
+  weaponInfoModal: document.querySelector("#weapon-info-modal"),
+  weaponInfoTitle: document.querySelector("#weapon-info-title"),
+  weaponInfoCloseButton: document.querySelector("#weapon-info-close-button"),
+  weaponInventoryGrid: document.querySelector("#weapon-inventory-grid"),
+  weaponStatList: document.querySelector("#weapon-stat-list"),
+  weaponEquipButton: document.querySelector("#weapon-equip-button"),
+  weaponDestroyButton: document.querySelector("#weapon-destroy-button"),
 };
 
 createGame({ ui, levels });

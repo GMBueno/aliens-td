@@ -534,19 +534,51 @@ export function createGame({ ui, levels }) {
     ui.weaponBar.querySelectorAll(".weapon-card").forEach((button) => {
       const weapon = weapons.find((item) => item.key === button.dataset.weaponKey);
       button.classList.toggle("selected", state.selectedWeaponKey === weapon.key);
-      button.disabled = state.gold < weapon.price;
+      button.classList.toggle("unaffordable", state.gold < weapon.price);
+      button.setAttribute("aria-disabled", state.gold < weapon.price ? "true" : "false");
     });
   }
 
   function renderWeaponBar() {
     ui.weaponBar.innerHTML = weapons.map((weapon, index) => `
-      <button class="weapon-card" data-weapon-key="${weapon.key}" type="button">
+      <article class="weapon-card" data-weapon-key="${weapon.key}">
+        <button class="weapon-info-button" data-info-weapon-key="${weapon.key}" type="button" aria-label="View ${weapon.name} attributes">i</button>
         <span class="slot-label">Slot ${index + 1}</span>
         <i style="--weapon-accent: ${weapon.accent}"></i>
         <strong>${weapon.name}</strong>
         <small>${weapon.price}g</small>
-      </button>
+      </article>
     `).join("");
+  }
+
+  function openWeaponInfo(weapon) {
+    ui.weaponInfoTitle.textContent = weapon.name;
+    ui.weaponInventoryGrid.innerHTML = Array.from({ length: 9 }, (_, index) => index === 0
+      ? `<button class="inventory-slot selected" type="button" aria-label="Selected ${weapon.name}">
+          <i style="--weapon-accent: ${weapon.accent}"></i>
+          <span>${weapon.nickname}</span>
+        </button>`
+      : `<button class="inventory-slot empty" type="button" aria-label="Empty inventory slot"></button>`).join("");
+    const stats = [
+      ["Damage", weapon.directDamage],
+      ["ATK Speed", `${weapon.atkSpeed}/s`],
+      ["Capacity", weapon.capacity],
+      ["Reload Time", `${weapon.reloadSpeed}s`],
+      ["Range", weapon.range],
+    ];
+    ui.weaponStatList.innerHTML = stats.map(([label, value]) => `
+      <div class="weapon-stat-row">
+        <span>${label}</span>
+        <strong>${value}</strong>
+      </div>
+    `).join("");
+    ui.weaponEquipButton.disabled = true;
+    ui.weaponDestroyButton.disabled = true;
+    ui.weaponInfoModal.classList.remove("hidden");
+  }
+
+  function closeWeaponInfo() {
+    ui.weaponInfoModal.classList.add("hidden");
   }
 
   function startLevel(level) {
@@ -612,11 +644,22 @@ export function createGame({ ui, levels }) {
   ui.menuPlayButton.addEventListener("click", () => startLevel(selectedLevel));
 
   ui.weaponBar.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-weapon-key]");
-    if (!button || button.disabled) return;
-    state.selectedWeaponKey = state.selectedWeaponKey === button.dataset.weaponKey ? null : button.dataset.weaponKey;
+    const infoButton = event.target.closest("[data-info-weapon-key]");
+    if (infoButton) {
+      const weapon = weapons.find((item) => item.key === infoButton.dataset.infoWeaponKey);
+      if (weapon) openWeaponInfo(weapon);
+      return;
+    }
+    const card = event.target.closest("[data-weapon-key]");
+    if (!card || card.getAttribute("aria-disabled") === "true") return;
+    state.selectedWeaponKey = state.selectedWeaponKey === card.dataset.weaponKey ? null : card.dataset.weaponKey;
     state.selectedTowerId = null;
     syncHud();
+  });
+
+  ui.weaponInfoCloseButton.addEventListener("click", closeWeaponInfo);
+  ui.weaponInfoModal.addEventListener("click", (event) => {
+    if (event.target === ui.weaponInfoModal) closeWeaponInfo();
   });
 
   function canvasTileFromEvent(event) {

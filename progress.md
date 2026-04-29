@@ -42,3 +42,9 @@ TODO
   expanded all levels from 9x7 to 16x9 with longer explicit tracks and wider build space;
   increased every weapon range, with sniper range increased the most;
   added a Web Audio shot sound in `fireTower`, so sound plays when the weapon fires rather than when the projectile impacts.
+
+- Added weapon slot info popups:
+  every weapon slot now has a top-right info button;
+  clicking it opens a two-column weapon inventory/details modal;
+  the left side is a 3x3 inventory grid with the current weapon selected in the first slot;
+  the right side shows damage, ATK speed, capacity, reload time, and range, plus disabled Equip and Destroy buttons reserved for later weapon drops/rewards.
