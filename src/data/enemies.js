@@ -2,8 +2,8 @@ export const enemies = {
   alien_normal: {
     key: "alien_normal",
     label: "Scout",
-    life: 55,
-    speed: 54,
+    life: 10000,
+    speed: 30,
     damage: 1,
     gold: 12,
     shape: "circle",
@@ -12,8 +12,8 @@ export const enemies = {
   alien_fast: {
     key: "alien_fast",
     label: "Skitter",
-    life: 34,
-    speed: 92,
+    life: 5000,
+    speed: 50,
     damage: 1,
     gold: 14,
     shape: "triangle",
@@ -22,8 +22,8 @@ export const enemies = {
   alien_tank: {
     key: "alien_tank",
     label: "Bulwark",
-    life: 145,
-    speed: 34,
+    life: 50000,
+    speed: 20,
     damage: 2,
     gold: 28,
     shape: "square",
@@ -32,8 +32,8 @@ export const enemies = {
   alien_boss: {
     key: "alien_boss",
     label: "Overseer",
-    life: 520,
-    speed: 26,
+    life: 100000,
+    speed: 15,
     damage: 6,
     gold: 120,
     shape: "pentagon",
