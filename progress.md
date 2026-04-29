@@ -48,3 +48,13 @@ TODO
   clicking it opens a two-column weapon inventory/details modal;
   the left side is a 3x3 inventory grid with the current weapon selected in the first slot;
   the right side shows damage, ATK speed, capacity, reload time, and range, plus disabled Equip and Destroy buttons reserved for later weapon drops/rewards.
+
+- Follow-up UI pass:
+  clicking a weapon info button now pauses the game while the inventory modal is open, then restores the previous pause state on close;
+  clicking a placed tower opens an arena-row sidebar with weapon attributes plus live ammo;
+  removed the visible arena wrapper card styling so the canvas and tower sidebar fit in the second UI row without a nested-card look;
+  swapped top controls so the speed toggle appears before Play/Pause.
+
+- Follow-up arena cleanup:
+  removed the remaining arena frame treatment and made the tower sidebar overlay the arena row instead of pushing/resizing the canvas;
+  changed Play/Pause from text to icon-only arrow/pause bars with accessible labels.

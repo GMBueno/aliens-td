@@ -152,6 +152,7 @@ function createInitialState(level, profile, canvas) {
     lives: level.lives,
     selectedWeaponKey: null,
     selectedTowerId: null,
+    wasPausedBeforeWeaponInfo: false,
     hoverTile: null,
     towers: [],
     enemies: [],
@@ -521,7 +522,10 @@ export function createGame({ ui, levels }) {
     ui.levelNameValue.textContent = state.level.name;
     ui.waveValue.textContent = `${Math.min(state.waveIndex + 1, state.level.waves.length)} / ${state.level.waves.length}`;
     ui.killsValue.textContent = `${state.kills} / ${state.totalEnemies}`;
-    ui.playPauseButton.textContent = state.isPaused ? "Play" : "Pause";
+    ui.playPauseButton.classList.toggle("play-icon", state.isPaused);
+    ui.playPauseButton.classList.toggle("pause-icon", !state.isPaused);
+    ui.playPauseButton.title = state.isPaused ? "Play" : "Pause";
+    ui.playPauseButton.setAttribute("aria-label", state.isPaused ? "Play" : "Pause");
     ui.speedToggleButton.textContent = `${state.gameSpeed}x`;
     ui.speedToggleButton.className = `control-button speed-state ${state.gameSpeed === 2 ? "fast" : "normal"}`;
     const ready = state.timeStopCooldown <= 0 && state.timeStopTimer <= 0;
@@ -537,6 +541,40 @@ export function createGame({ ui, levels }) {
       button.classList.toggle("unaffordable", state.gold < weapon.price);
       button.setAttribute("aria-disabled", state.gold < weapon.price ? "true" : "false");
     });
+    syncTowerSidebar();
+  }
+
+  function weaponStatsMarkup(weapon) {
+    const stats = [
+      ["Damage", weapon.directDamage],
+      ["ATK Speed", `${weapon.atkSpeed}/s`],
+      ["Capacity", weapon.capacity],
+      ["Reload Time", `${weapon.reloadSpeed}s`],
+      ["Range", weapon.range],
+    ];
+    return stats.map(([label, value]) => `
+      <div class="weapon-stat-row">
+        <span>${label}</span>
+        <strong>${value}</strong>
+      </div>
+    `).join("");
+  }
+
+  function syncTowerSidebar() {
+    const tower = state?.towers.find((item) => item.id === state.selectedTowerId);
+    if (!tower) {
+      ui.towerSidebar.classList.add("hidden");
+      return;
+    }
+    ui.towerSidebarTitle.textContent = tower.weapon.name;
+    ui.towerStatList.innerHTML = `
+      ${weaponStatsMarkup(tower.weapon)}
+      <div class="weapon-stat-row">
+        <span>Ammo</span>
+        <strong>${tower.ammo} / ${tower.weapon.capacity}</strong>
+      </div>
+    `;
+    ui.towerSidebar.classList.remove("hidden");
   }
 
   function renderWeaponBar() {
@@ -552,6 +590,10 @@ export function createGame({ ui, levels }) {
   }
 
   function openWeaponInfo(weapon) {
+    if (state) {
+      state.wasPausedBeforeWeaponInfo = state.isPaused;
+      state.isPaused = true;
+    }
     ui.weaponInfoTitle.textContent = weapon.name;
     ui.weaponInventoryGrid.innerHTML = Array.from({ length: 9 }, (_, index) => index === 0
       ? `<button class="inventory-slot selected" type="button" aria-label="Selected ${weapon.name}">
@@ -559,26 +601,19 @@ export function createGame({ ui, levels }) {
           <span>${weapon.nickname}</span>
         </button>`
       : `<button class="inventory-slot empty" type="button" aria-label="Empty inventory slot"></button>`).join("");
-    const stats = [
-      ["Damage", weapon.directDamage],
-      ["ATK Speed", `${weapon.atkSpeed}/s`],
-      ["Capacity", weapon.capacity],
-      ["Reload Time", `${weapon.reloadSpeed}s`],
-      ["Range", weapon.range],
-    ];
-    ui.weaponStatList.innerHTML = stats.map(([label, value]) => `
-      <div class="weapon-stat-row">
-        <span>${label}</span>
-        <strong>${value}</strong>
-      </div>
-    `).join("");
+    ui.weaponStatList.innerHTML = weaponStatsMarkup(weapon);
     ui.weaponEquipButton.disabled = true;
     ui.weaponDestroyButton.disabled = true;
     ui.weaponInfoModal.classList.remove("hidden");
+    syncHud();
   }
 
   function closeWeaponInfo() {
     ui.weaponInfoModal.classList.add("hidden");
+    if (state) {
+      state.isPaused = state.wasPausedBeforeWeaponInfo;
+      syncHud();
+    }
   }
 
   function startLevel(level) {
@@ -706,6 +741,12 @@ export function createGame({ ui, levels }) {
   ui.speedToggleButton.addEventListener("click", () => {
     if (!state) return;
     state.gameSpeed = state.gameSpeed === 1 ? 2 : 1;
+    syncHud();
+  });
+
+  ui.towerSidebarCloseButton.addEventListener("click", () => {
+    if (!state) return;
+    state.selectedTowerId = null;
     syncHud();
   });
 

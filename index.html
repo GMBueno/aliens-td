@@ -36,14 +36,24 @@
             <div class="hud-chip"><span class="skull"></span><strong id="kills-value">0 / 0</strong></div>
           </div>
           <div class="hud-group">
-            <button class="control-button" id="play-pause-button" type="button" title="Play / Pause">Pause</button>
             <button class="control-button speed-state" id="speed-toggle-button" type="button" title="Game Speed">1x</button>
+            <button class="control-button icon-control pause-icon" id="play-pause-button" type="button" title="Pause" aria-label="Pause"></button>
             <button class="control-button gear-button" id="gear-button" type="button" title="Menu">Gear</button>
           </div>
         </header>
 
         <section class="arena-wrap">
           <canvas id="game-canvas" width="1280" height="720"></canvas>
+          <aside class="tower-sidebar hidden" id="tower-sidebar">
+            <div class="tower-sidebar-head">
+              <div>
+                <p>Tower Stats</p>
+                <h2 id="tower-sidebar-title">Weapon</h2>
+              </div>
+              <button class="icon-button compact" id="tower-sidebar-close-button" type="button" aria-label="Close tower stats">×</button>
+            </div>
+            <div class="weapon-stat-list" id="tower-stat-list"></div>
+          </aside>
         </section>
 
         <footer class="hud hud-bottom">
