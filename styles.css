@@ -303,11 +303,11 @@ button:disabled {
 
 .player-chip i {
   position: absolute;
-  left: 116px;
+  left: 90px;
   top: 50%;
   transform: translateY(-50%);
   width: var(--xp-progress, 0%);
-  max-width: calc(100% - 138px);
+  max-width: calc(100% - 164px);
   height: 8px;
   border-radius: 2px;
   background: var(--green);
