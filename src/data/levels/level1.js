@@ -1,10 +1,10 @@
 const level1 = {
   "id": "level_1",
   "name": "Level One",
-  "description": "A compact alien route tuned for MVP wave 1.",
-  "cols": 9,
-  "rows": 7,
-  "tileSize": 82,
+  "description": "A wider alien route tuned for MVP wave 1.",
+  "cols": 16,
+  "rows": 9,
+  "tileSize": 64,
   "startGold": 265,
   "lives": 18,
   "blockers": [
@@ -14,15 +14,23 @@ const level1 = {
     },
     {
       "row": 0,
-      "col": 8
+      "col": 15
     },
     {
-      "row": 6,
+      "row": 8,
       "col": 0
     },
     {
-      "row": 6,
-      "col": 8
+      "row": 8,
+      "col": 15
+    },
+    {
+      "row": 0,
+      "col": 7
+    },
+    {
+      "row": 8,
+      "col": 7
     }
   ],
   "track": [
@@ -47,19 +55,11 @@ const level1 = {
       "col": 4
     },
     {
-      "row": 3,
-      "col": 4
-    },
-    {
-      "row": 2,
-      "col": 4
-    },
-    {
-      "row": 2,
+      "row": 4,
       "col": 5
     },
     {
-      "row": 2,
+      "row": 4,
       "col": 6
     },
     {
@@ -67,16 +67,64 @@ const level1 = {
       "col": 6
     },
     {
-      "row": 4,
+      "row": 2,
       "col": 6
     },
     {
-      "row": 4,
+      "row": 2,
       "col": 7
     },
     {
-      "row": 4,
+      "row": 2,
       "col": 8
+    },
+    {
+      "row": 2,
+      "col": 9
+    },
+    {
+      "row": 3,
+      "col": 9
+    },
+    {
+      "row": 4,
+      "col": 9
+    },
+    {
+      "row": 5,
+      "col": 9
+    },
+    {
+      "row": 5,
+      "col": 10
+    },
+    {
+      "row": 5,
+      "col": 11
+    },
+    {
+      "row": 5,
+      "col": 12
+    },
+    {
+      "row": 4,
+      "col": 12
+    },
+    {
+      "row": 3,
+      "col": 12
+    },
+    {
+      "row": 3,
+      "col": 13
+    },
+    {
+      "row": 3,
+      "col": 14
+    },
+    {
+      "row": 3,
+      "col": 15
     }
   ],
   "waves": [

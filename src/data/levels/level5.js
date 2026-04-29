@@ -1,10 +1,10 @@
 const level5 = {
   "id": "level_5",
   "name": "Level Five",
-  "description": "A compact alien route tuned for MVP wave 5.",
-  "cols": 9,
-  "rows": 7,
-  "tileSize": 82,
+  "description": "A wider alien route tuned for MVP wave 5.",
+  "cols": 16,
+  "rows": 9,
+  "tileSize": 64,
   "startGold": 353,
   "lives": 19,
   "blockers": [
@@ -14,23 +14,35 @@ const level5 = {
     },
     {
       "row": 0,
-      "col": 8
+      "col": 15
     },
     {
-      "row": 6,
+      "row": 8,
       "col": 0
     },
     {
-      "row": 6,
-      "col": 8
+      "row": 8,
+      "col": 15
     },
     {
-      "row": 1,
+      "row": 0,
       "col": 7
     },
     {
-      "row": 5,
-      "col": 1
+      "row": 8,
+      "col": 7
+    },
+    {
+      "row": 1,
+      "col": 13
+    },
+    {
+      "row": 7,
+      "col": 2
+    },
+    {
+      "row": 6,
+      "col": 14
     }
   ],
   "track": [
@@ -43,39 +55,31 @@ const level5 = {
       "col": 1
     },
     {
-      "row": 2,
-      "col": 1
+      "row": 1,
+      "col": 2
     },
     {
-      "row": 3,
-      "col": 1
+      "row": 2,
+      "col": 2
     },
     {
       "row": 3,
       "col": 2
     },
     {
-      "row": 3,
+      "row": 4,
+      "col": 2
+    },
+    {
+      "row": 4,
       "col": 3
     },
     {
-      "row": 2,
-      "col": 3
-    },
-    {
-      "row": 1,
-      "col": 3
-    },
-    {
-      "row": 1,
+      "row": 4,
       "col": 4
     },
     {
-      "row": 1,
-      "col": 5
-    },
-    {
-      "row": 2,
+      "row": 4,
       "col": 5
     },
     {
@@ -83,20 +87,76 @@ const level5 = {
       "col": 5
     },
     {
-      "row": 4,
+      "row": 2,
       "col": 5
     },
     {
-      "row": 4,
+      "row": 1,
+      "col": 5
+    },
+    {
+      "row": 1,
       "col": 6
     },
     {
-      "row": 4,
+      "row": 1,
       "col": 7
+    },
+    {
+      "row": 1,
+      "col": 8
+    },
+    {
+      "row": 2,
+      "col": 8
+    },
+    {
+      "row": 3,
+      "col": 8
     },
     {
       "row": 4,
       "col": 8
+    },
+    {
+      "row": 5,
+      "col": 8
+    },
+    {
+      "row": 5,
+      "col": 9
+    },
+    {
+      "row": 5,
+      "col": 10
+    },
+    {
+      "row": 5,
+      "col": 11
+    },
+    {
+      "row": 4,
+      "col": 11
+    },
+    {
+      "row": 3,
+      "col": 11
+    },
+    {
+      "row": 3,
+      "col": 12
+    },
+    {
+      "row": 3,
+      "col": 13
+    },
+    {
+      "row": 3,
+      "col": 14
+    },
+    {
+      "row": 3,
+      "col": 15
     }
   ],
   "waves": [

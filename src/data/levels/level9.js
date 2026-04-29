@@ -1,10 +1,10 @@
 const level9 = {
   "id": "level_9",
   "name": "Level Nine",
-  "description": "A compact alien route tuned for MVP wave 9.",
-  "cols": 9,
-  "rows": 7,
-  "tileSize": 82,
+  "description": "A wider alien route tuned for MVP wave 9.",
+  "cols": 16,
+  "rows": 9,
+  "tileSize": 64,
   "startGold": 441,
   "lives": 21,
   "blockers": [
@@ -14,49 +14,77 @@ const level9 = {
     },
     {
       "row": 0,
-      "col": 8
+      "col": 15
     },
     {
-      "row": 6,
+      "row": 8,
       "col": 0
     },
     {
-      "row": 6,
-      "col": 8
+      "row": 8,
+      "col": 15
     },
     {
-      "row": 1,
+      "row": 0,
       "col": 7
     },
     {
-      "row": 5,
-      "col": 1
+      "row": 8,
+      "col": 7
+    },
+    {
+      "row": 1,
+      "col": 13
+    },
+    {
+      "row": 7,
+      "col": 2
+    },
+    {
+      "row": 6,
+      "col": 14
+    },
+    {
+      "row": 2,
+      "col": 11
+    },
+    {
+      "row": 6,
+      "col": 5
     }
   ],
   "track": [
     {
-      "row": 5,
+      "row": 7,
       "col": 0
     },
     {
-      "row": 5,
+      "row": 7,
       "col": 1
     },
     {
-      "row": 5,
+      "row": 7,
       "col": 2
+    },
+    {
+      "row": 7,
+      "col": 3
+    },
+    {
+      "row": 6,
+      "col": 3
+    },
+    {
+      "row": 5,
+      "col": 3
     },
     {
       "row": 4,
-      "col": 2
+      "col": 3
     },
     {
       "row": 3,
-      "col": 2
-    },
-    {
-      "row": 2,
-      "col": 2
+      "col": 3
     },
     {
       "row": 2,
@@ -67,23 +95,15 @@ const level9 = {
       "col": 4
     },
     {
-      "row": 3,
-      "col": 4
-    },
-    {
-      "row": 4,
-      "col": 4
-    },
-    {
-      "row": 5,
-      "col": 4
-    },
-    {
-      "row": 5,
+      "row": 2,
       "col": 5
     },
     {
-      "row": 5,
+      "row": 2,
+      "col": 6
+    },
+    {
+      "row": 3,
       "col": 6
     },
     {
@@ -91,16 +111,68 @@ const level9 = {
       "col": 6
     },
     {
-      "row": 3,
+      "row": 5,
       "col": 6
     },
     {
-      "row": 3,
+      "row": 6,
+      "col": 6
+    },
+    {
+      "row": 6,
       "col": 7
     },
     {
-      "row": 3,
+      "row": 6,
       "col": 8
+    },
+    {
+      "row": 6,
+      "col": 9
+    },
+    {
+      "row": 5,
+      "col": 9
+    },
+    {
+      "row": 4,
+      "col": 9
+    },
+    {
+      "row": 3,
+      "col": 9
+    },
+    {
+      "row": 3,
+      "col": 10
+    },
+    {
+      "row": 3,
+      "col": 11
+    },
+    {
+      "row": 3,
+      "col": 12
+    },
+    {
+      "row": 4,
+      "col": 12
+    },
+    {
+      "row": 5,
+      "col": 12
+    },
+    {
+      "row": 5,
+      "col": 13
+    },
+    {
+      "row": 5,
+      "col": 14
+    },
+    {
+      "row": 5,
+      "col": 15
     }
   ],
   "waves": [

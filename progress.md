@@ -37,3 +37,8 @@ TODO
   selecting a weapon shows its circular range over the hovered build tile;
   clicking an already placed tower shows that tower's circular range.
 - Split the old 3-state speed button into separate Play/Pause and 1x/2x controls.
+
+- Follow-up balance/audio pass:
+  expanded all levels from 9x7 to 16x9 with longer explicit tracks and wider build space;
+  increased every weapon range, with sniper range increased the most;
+  added a Web Audio shot sound in `fireTower`, so sound plays when the weapon fires rather than when the projectile impacts.

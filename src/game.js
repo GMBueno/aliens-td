@@ -6,6 +6,7 @@ const TWO_PI = Math.PI * 2;
 const BOARD_PAD = 34;
 const NEXT_WAVE_DELAY = 2.2;
 const TIME_STOP = { duration: 4, cooldown: 18, price: 250 };
+let audioContext = null;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -13,6 +14,48 @@ function clamp(value, min, max) {
 
 function distance(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function getAudioContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  if (!audioContext) audioContext = new AudioContextClass();
+  if (audioContext.state === "suspended") audioContext.resume();
+  return audioContext;
+}
+
+function playShotSound(weapon) {
+  const context = getAudioContext();
+  if (!context) return;
+  const now = context.currentTime;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  const filter = context.createBiquadFilter();
+  const pitch = {
+    handgun: 660,
+    magnum: 440,
+    assault_rifle: 760,
+    machine_pistol: 880,
+    shotgun: 320,
+    sniper: 520,
+  }[weapon.key] || 620;
+  const duration = weapon.key === "shotgun" ? 0.09 : weapon.key === "sniper" ? 0.12 : 0.055;
+
+  oscillator.type = weapon.key === "magnum" || weapon.key === "shotgun" ? "sawtooth" : "square";
+  oscillator.frequency.setValueAtTime(pitch, now);
+  oscillator.frequency.exponentialRampToValueAtTime(Math.max(80, pitch * 0.45), now + duration);
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(1800, now);
+  filter.frequency.exponentialRampToValueAtTime(420, now + duration);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.08, now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  oscillator.connect(filter);
+  filter.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(now);
+  oscillator.stop(now + duration + 0.02);
 }
 
 function loadProfile() {
@@ -172,6 +215,7 @@ function fireTower(state, tower, target) {
       createProjectile(state, tower, target, (i - center) * spread);
     }
   }
+  playShotSound(tower.weapon);
   tower.cooldown = 1 / tower.weapon.atkSpeed;
   tower.ammo -= 1;
 }
