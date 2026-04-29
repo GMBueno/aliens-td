@@ -58,3 +58,6 @@ TODO
 - Follow-up arena cleanup:
   removed the remaining arena frame treatment and made the tower sidebar overlay the arena row instead of pushing/resizing the canvas;
   changed Play/Pause from text to icon-only arrow/pause bars with accessible labels.
+
+- Renamed the in-game level HUD chip to Mission and display missions as `1-1` through `1-9` so it does not conflict with persistent player level.
+- Simplified the first-screen selector to say Mission Selector, removed the game title eyebrow, and made mission tiles show only `1-1` through `1-9`.

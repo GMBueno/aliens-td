@@ -12,7 +12,7 @@ const ui = {
   playerLevelButton: document.querySelector("#player-level-button"),
   playerLevelValue: document.querySelector("#player-level-value"),
   playerXpBar: document.querySelector("#player-xp-bar"),
-  levelNameValue: document.querySelector("#level-name-value"),
+  missionValue: document.querySelector("#mission-value"),
   waveValue: document.querySelector("#wave-value"),
   killsValue: document.querySelector("#kills-value"),
   playPauseButton: document.querySelector("#play-pause-button"),

@@ -117,6 +117,11 @@ function waveTotal(level) {
   return level.waves.reduce((total, wave) => total + wave.spawns.length, 0);
 }
 
+function missionLabel(level) {
+  const missionNumber = Number(level.id.split("_")[1]) || 1;
+  return `1-${missionNumber}`;
+}
+
 function makeEnemy(spawn, state) {
   const definition = getEnemy(spawn.enemy);
   return {
@@ -506,8 +511,7 @@ export function createGame({ ui, levels }) {
   function syncMenu() {
     ui.levelGrid.innerHTML = levels.map((level, index) => `
       <button class="level-tile ${selectedLevel?.id === level.id ? "selected" : ""}" data-level-id="${level.id}" type="button">
-        <strong>${index + 1}</strong>
-        <span>${level.name}</span>
+        <strong>1-${index + 1}</strong>
       </button>
     `).join("");
     ui.menuPlayButton.disabled = !selectedLevel;
@@ -518,8 +522,8 @@ export function createGame({ ui, levels }) {
     ui.livesValue.textContent = Math.max(0, state.lives);
     ui.goldValue.textContent = state.gold;
     ui.playerLevelValue.textContent = profile.level;
-    ui.playerXpBar.style.width = `${Math.round((profile.xp / xpNeeded(profile.level)) * 100)}%`;
-    ui.levelNameValue.textContent = state.level.name;
+    ui.playerXpBar.style.setProperty("--xp-progress", `${Math.round((profile.xp / xpNeeded(profile.level)) * 100)}%`);
+    ui.missionValue.textContent = missionLabel(state.level);
     ui.waveValue.textContent = `${Math.min(state.waveIndex + 1, state.level.waves.length)} / ${state.level.waves.length}`;
     ui.killsValue.textContent = `${state.kills} / ${state.totalEnemies}`;
     ui.playPauseButton.classList.toggle("play-icon", state.isPaused);
@@ -776,7 +780,9 @@ export function createGame({ ui, levels }) {
     mode: ui.mainMenu.classList.contains("hidden") ? "game" : "menu",
     coordinateSystem: "canvas origin top-left, x right, y down",
     selectedLevel: selectedLevel?.id,
+    selectedMission: selectedLevel ? missionLabel(selectedLevel) : null,
     level: state?.level?.id,
+    mission: state ? missionLabel(state.level) : null,
     lives: state?.lives,
     gold: state?.gold,
     player: { level: profile.level, xp: profile.xp, skillPoints: profile.skillPoints },
