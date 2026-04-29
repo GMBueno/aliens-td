@@ -4,7 +4,7 @@ const level5 = {
   "description": "A wider alien route tuned for MVP wave 5.",
   "cols": 16,
   "rows": 9,
-  "tileSize": 64,
+  "tileSize": 48,
   "startGold": 353,
   "lives": 19,
   "blockers": [

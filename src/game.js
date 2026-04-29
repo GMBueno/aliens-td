@@ -4,7 +4,7 @@ import { PLAYER_PROFILE_KEY, createDefaultProfile, xpNeeded } from "./data/playe
 import { assets as assetPaths } from "./data/assets.js";
 
 const TWO_PI = Math.PI * 2;
-const BOARD_PAD = 34;
+const BOARD_PAD = 12;
 const NEXT_WAVE_DELAY = 2.2;
 const TIME_STOP = { duration: 4, cooldown: 18, price: 250 };
 let audioContext = null;
@@ -75,6 +75,7 @@ function applyAssetCssVariables(root) {
     "--hud-menu-button": assetPaths.hud.menuButton,
     "--hud-speed-plaque": assetPaths.hud.speedPlaque,
     "--slot-price-plaque": assetPaths.slots.pricePlaque,
+    "--active-plaque": assetPaths.slots.activePlaque,
     "--time-stop-card": assetPaths.slots.timeStopCard,
   };
   Object.entries(vars).forEach(([name, src]) => root.style.setProperty(name, cssUrl(src)));

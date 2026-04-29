@@ -160,7 +160,7 @@ button:disabled {
 
 .game-screen {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: 52px minmax(0, 1fr) 220px;
   gap: 10px;
   padding: 10px;
 }
@@ -173,6 +173,7 @@ button:disabled {
 }
 
 .hud-top {
+  height: 52px;
   justify-content: center;
 }
 
@@ -216,7 +217,7 @@ button:disabled {
 }
 
 .hud-chip.wide {
-  width: 210px;
+  width: 178px;
 }
 
 .hud-chip span {
@@ -228,7 +229,7 @@ button:disabled {
 }
 
 .hud-chip strong {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   color: #f6efe0;
   text-shadow: 0 2px 3px rgba(0, 0, 0, 0.85);
 }
@@ -260,7 +261,7 @@ button:disabled {
 .mission-chip {
   --hud-chip-bg: var(--hud-mission-plaque);
   justify-content: center;
-  padding-left: 64px;
+  padding-left: 68px;
 }
 
 .wave-chip {
@@ -395,6 +396,7 @@ button:disabled {
   background: var(--hud-speed-plaque) center / 100% 100% no-repeat;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
   text-shadow: 0 2px 3px rgba(0, 0, 0, 0.85);
+  font-size: 0.92rem;
 }
 
 .icon-control {
@@ -434,10 +436,12 @@ button:disabled {
 }
 
 .arena-wrap {
+  height: 100%;
   min-height: 0;
   position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -447,9 +451,12 @@ button:disabled {
 }
 
 #game-canvas {
-  display: block;
-  width: min(100%, calc((100vh - 222px) * 16 / 9));
+  display: inline-block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
   max-height: 100%;
+  flex: 0 1 auto;
   min-width: 0;
   aspect-ratio: 16 / 9;
   border-radius: 6px;
@@ -495,6 +502,7 @@ button:disabled {
 }
 
 .hud-bottom {
+  height: 220px;
   display: grid;
   grid-template-columns: 170px auto;
   justify-content: center;
@@ -534,6 +542,15 @@ button:disabled {
 .ability-card small {
   align-self: end;
   margin-bottom: 4px;
+  min-width: 98px;
+  min-height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  padding: 4px 14px 5px;
+  background: var(--active-plaque) center / 100% 100% no-repeat;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.82);
 }
 
 .ability-card small,
@@ -544,6 +561,13 @@ button:disabled {
   border-radius: 5px;
   padding: 3px 12px;
   font-weight: 900;
+}
+
+.ability-card small {
+  border: 0;
+  border-radius: 0;
+  padding: 4px 14px 5px;
+  background: var(--active-plaque) center / 100% 100% no-repeat;
 }
 
 .weapon-card small {
