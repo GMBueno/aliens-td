@@ -10,7 +10,6 @@ Original prompt: using @game-studio create a simple top-down alien-themed tower 
   `src/data/enemies.js`,
   `src/data/weapons.js`,
   `src/data/player.js`,
-  `src/data/levelFactory.js`,
   and `src/data/levels/level1.js` through `level9.js`.
 - Gameplay currently includes:
   a 3x3 level selector,
@@ -31,3 +30,10 @@ TODO
 - Replace canvas/CSS placeholder art with isolated or provided image assets.
 - Add the later skill tree/proficiency screen from the player-level button.
 - Balance levels and weapon numbers after a few real play sessions.
+
+- Follow-up change:
+  removed `src/data/levelFactory.js` and expanded every level into a fully explicit `levelN.js` object so track, blockers, starting resources, lives, and every spawn timing are visible in the file that owns that level.
+- Added tower range inspection:
+  selecting a weapon shows its circular range over the hovered build tile;
+  clicking an already placed tower shows that tower's circular range.
+- Split the old 3-state speed button into separate Play/Pause and 1x/2x controls.

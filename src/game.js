@@ -108,6 +108,8 @@ function createInitialState(level, profile, canvas) {
     gold: level.startGold,
     lives: level.lives,
     selectedWeaponKey: null,
+    selectedTowerId: null,
+    hoverTile: null,
     towers: [],
     enemies: [],
     projectiles: [],
@@ -345,6 +347,19 @@ function drawTower(ctx, tower) {
   ctx.restore();
 }
 
+function drawRangeCircle(ctx, x, y, range, color = "rgba(116, 224, 108, 0.82)") {
+  ctx.save();
+  ctx.fillStyle = "rgba(116, 224, 108, 0.08)";
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 7]);
+  ctx.beginPath();
+  ctx.arc(x, y, range, 0, TWO_PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawGame(ctx, state) {
   const { board, level, tileSets } = state;
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -396,6 +411,14 @@ function drawGame(ctx, state) {
         }
       }
     }
+    if (state.hoverTile) {
+      const key = tileKey(state.hoverTile.row, state.hoverTile.col);
+      const occupied = state.towers.some((tower) => tower.row === state.hoverTile.row && tower.col === state.hoverTile.col);
+      const canPlace = !tileSets.path.has(key) && !tileSets.blockers.has(key) && !occupied;
+      const x = board.x + state.hoverTile.col * board.tile + board.tile / 2;
+      const y = board.y + state.hoverTile.row * board.tile + board.tile / 2;
+      drawRangeCircle(ctx, x, y, selected.range, canPlace ? "rgba(116, 224, 108, 0.88)" : "rgba(255, 103, 125, 0.82)");
+    }
   }
 
   state.towers.forEach((tower) => {
@@ -403,6 +426,11 @@ function drawGame(ctx, state) {
     if (target) tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
     drawTower(ctx, tower);
   });
+
+  const inspectedTower = state.towers.find((tower) => tower.id === state.selectedTowerId);
+  if (inspectedTower) {
+    drawRangeCircle(ctx, inspectedTower.x, inspectedTower.y, inspectedTower.range, "rgba(91, 206, 255, 0.88)");
+  }
 
   state.projectiles.forEach((projectile) => {
     ctx.fillStyle = "#ffe57c";
@@ -449,8 +477,9 @@ export function createGame({ ui, levels }) {
     ui.levelNameValue.textContent = state.level.name;
     ui.waveValue.textContent = `${Math.min(state.waveIndex + 1, state.level.waves.length)} / ${state.level.waves.length}`;
     ui.killsValue.textContent = `${state.kills} / ${state.totalEnemies}`;
-    ui.speedControl.textContent = state.isPaused ? "Play" : state.gameSpeed === 2 ? "2x" : "Pause";
-    ui.speedControl.className = `control-button speed-state ${state.isPaused ? "paused" : state.gameSpeed === 2 ? "fast" : "running"}`;
+    ui.playPauseButton.textContent = state.isPaused ? "Play" : "Pause";
+    ui.speedToggleButton.textContent = `${state.gameSpeed}x`;
+    ui.speedToggleButton.className = `control-button speed-state ${state.gameSpeed === 2 ? "fast" : "normal"}`;
     const ready = state.timeStopCooldown <= 0 && state.timeStopTimer <= 0;
     ui.timeStopButton.disabled = !ready;
     ui.timeStopStatus.textContent = state.timeStopTimer > 0
@@ -503,7 +532,7 @@ export function createGame({ ui, levels }) {
     const occupied = state.towers.some((tower) => tower.row === row && tower.col === col);
     if (state.gold < weapon.price || state.tileSets.path.has(key) || state.tileSets.blockers.has(key) || occupied) return;
     state.gold -= weapon.price;
-    state.towers.push({
+    const tower = {
       id: `tower-${state.nextTowerId++}`,
       weapon,
       row,
@@ -515,7 +544,9 @@ export function createGame({ ui, levels }) {
       ammo: weapon.capacity,
       reloadTimer: 0,
       angle: 0,
-    });
+    };
+    state.towers.push(tower);
+    state.selectedTowerId = tower.id;
   }
 
   function showResult() {
@@ -540,27 +571,54 @@ export function createGame({ ui, levels }) {
     const button = event.target.closest("[data-weapon-key]");
     if (!button || button.disabled) return;
     state.selectedWeaponKey = state.selectedWeaponKey === button.dataset.weaponKey ? null : button.dataset.weaponKey;
+    state.selectedTowerId = null;
     syncHud();
   });
 
-  ui.canvas.addEventListener("click", (event) => {
+  function canvasTileFromEvent(event) {
     if (!state) return;
     const rect = ui.canvas.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * ui.canvas.width;
     const y = ((event.clientY - rect.top) / rect.height) * ui.canvas.height;
     const col = Math.floor((x - state.board.x) / state.board.tile);
     const row = Math.floor((y - state.board.y) / state.board.tile);
-    if (row >= 0 && row < state.level.rows && col >= 0 && col < state.level.cols) tryPlaceTower(row, col);
+    if (row < 0 || row >= state.level.rows || col < 0 || col >= state.level.cols) return null;
+    return { row, col };
+  }
+
+  ui.canvas.addEventListener("mousemove", (event) => {
+    if (!state) return;
+    state.hoverTile = canvasTileFromEvent(event);
   });
 
-  ui.speedControl.addEventListener("click", () => {
+  ui.canvas.addEventListener("mouseleave", () => {
+    if (state) state.hoverTile = null;
+  });
+
+  ui.canvas.addEventListener("click", (event) => {
     if (!state) return;
-    if (!state.isPaused && state.gameSpeed === 1) state.gameSpeed = 2;
-    else if (!state.isPaused && state.gameSpeed === 2) state.isPaused = true;
-    else {
-      state.isPaused = false;
-      state.gameSpeed = 1;
+    const tile = canvasTileFromEvent(event);
+    if (!tile) return;
+    const tower = state.towers.find((item) => item.row === tile.row && item.col === tile.col);
+    if (tower) {
+      state.selectedTowerId = tower.id;
+      state.selectedWeaponKey = null;
+      syncHud();
+      return;
     }
+    state.selectedTowerId = null;
+    tryPlaceTower(tile.row, tile.col);
+  });
+
+  ui.playPauseButton.addEventListener("click", () => {
+    if (!state) return;
+    state.isPaused = !state.isPaused;
+    syncHud();
+  });
+
+  ui.speedToggleButton.addEventListener("click", () => {
+    if (!state) return;
+    state.gameSpeed = state.gameSpeed === 1 ? 2 : 1;
     syncHud();
   });
 
@@ -597,7 +655,8 @@ export function createGame({ ui, levels }) {
     wave: state ? `${Math.min(state.waveIndex + 1, state.level.waves.length)}/${state.level.waves.length}` : null,
     kills: state ? `${state.kills}/${state.totalEnemies}` : null,
     selectedWeapon: state?.selectedWeaponKey,
-    towers: state?.towers.map((tower) => ({ weapon: tower.weapon.key, row: tower.row, col: tower.col, ammo: tower.ammo })) || [],
+    selectedTower: state?.selectedTowerId,
+    towers: state?.towers.map((tower) => ({ id: tower.id, weapon: tower.weapon.key, row: tower.row, col: tower.col, range: tower.range, ammo: tower.ammo })) || [],
     enemies: state?.enemies.map((enemy) => ({ key: enemy.key, x: Math.round(enemy.x), y: Math.round(enemy.y), life: Math.round(enemy.life) })) || [],
     result: state?.result,
   });
