@@ -28,6 +28,11 @@ python3 -m http.server 4181
 
 Then open http://localhost:4181.
 
+## GitHub Pages
+
+This repository is a static site. GitHub Pages deploys it from the
+`.github/workflows/deploy-pages.yml` workflow whenever `main` is pushed.
+
 ## Swapping Art
 
 Most runtime asset paths are centralized in `src/data/assets.js`.
