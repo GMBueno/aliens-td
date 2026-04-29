@@ -50,7 +50,7 @@ export const weapons = [
     atkSpeed: 2,
     capacity: 6,
     reloadSpeed: 1.55,
-    directDamage: 2500,
+    directDamage: 1000,
     projectileSpeed: 440,
     pelletCount: 4,
     spread: 0.28,
