@@ -1,4 +1,4 @@
-# Alien Armory Defense
+# Aliens Tower Defense
 
 Top-down alien tower-defense MVP inspired by classic lane/path defense games.
 

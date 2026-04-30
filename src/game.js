@@ -6,7 +6,7 @@ import { assets as assetPaths } from "./data/assets.js";
 const TWO_PI = Math.PI * 2;
 const BOARD_PAD = 12;
 const NEXT_WAVE_DELAY = 2.2;
-const TIME_STOP = { duration: 4, cooldown: 18, price: 250 };
+const TIME_STOP = { duration: 4, cooldown: 20, price: 0 };
 let audioContext = null;
 const ASSET_CACHE_BUSTER = Date.now().toString(36);
 

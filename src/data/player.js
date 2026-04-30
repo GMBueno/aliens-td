@@ -1,4 +1,4 @@
-export const PLAYER_PROFILE_KEY = "alien-armory-defense-profile";
+export const PLAYER_PROFILE_KEY = "aliens-tower-defense-profile";
 
 export function createDefaultProfile() {
   return {
@@ -9,5 +9,5 @@ export function createDefaultProfile() {
 }
 
 export function xpNeeded(level) {
-  return 100 + (level - 1) * 45;
+  return 75 + (level * 25);
 }
