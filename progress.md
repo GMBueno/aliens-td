@@ -63,7 +63,7 @@ TODO
 - Simplified the first-screen selector to say Mission Selector, removed the game title eyebrow, and made mission tiles show only `1-1` through `1-9`.
 
 - Asset integration pass:
-  copied the provided metal tile into assets/tiles/metal-floor.png and HUD reference into assets/ui/hud-controls-reference.png;
+  copied the provided metal tile into assets/tiles/metal-floor.png and HUD reference into assets/ui/hud-controls-reference.png (doesn't exist anymore);
   cropped the provided turret strip into six PNGs under assets/towers/;
   wired weapon asset paths into src/data/weapons.js;
   updated src/game.js to preload/draw the metal tile and turret sprites on the canvas with placeholder fallback;

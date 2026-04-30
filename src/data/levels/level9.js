@@ -5,7 +5,7 @@ const level9 = {
   "cols": 16,
   "rows": 9,
   "tileSize": 48,
-  "startGold": 441,
+  "startGold": 2040,
   "lives": 21,
   "blockers": [
     {
@@ -181,40 +181,36 @@ const level9 = {
       "spawns": [
         {
           "enemy": "alien_shielded",
-          "at": 0.5
+          "at": 16.5
         },
         {
           "enemy": "alien_saucer",
-          "at": 2.5
+          "at": 18.5
         },
         {
           "enemy": "alien_boss",
-          "at": 4.5
+          "at": 20.5
         },
-        // {
-        //   "enemy": "alien_normal",
-        //   "at": 1.25
-        // },
-        // {
-        //   "enemy": "alien_normal",
-        //   "at": 2
-        // },
-        // {
-        //   "enemy": "alien_normal",
-        //   "at": 2.75
-        // },
-        // {
-        //   "enemy": "alien_normal",
-        //   "at": 3.5
-        // },
-        // {
-        //   "enemy": "alien_normal",
-        //   "at": 4.25
-        // },
-        // {
-        //   "enemy": "alien_normal",
-        //   "at": 5
-        // },
+        {
+          "enemy": "alien_tank",
+          "at": 1
+        },
+        {
+          "enemy": "alien_tank",
+          "at": 10.0
+        },
+        {
+          "enemy": "alien_fast",
+          "at": 10
+        },
+        {
+          "enemy": "alien_fast",
+          "at": 4.0
+        },
+        {
+          "enemy": "alien_fast",
+          "at": 1
+        },
         // {
         //   "enemy": "alien_normal",
         //   "at": 5.75
