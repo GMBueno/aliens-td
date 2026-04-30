@@ -798,10 +798,10 @@ export function createGame({ ui, levels }) {
   function renderWeaponBar() {
     ui.weaponBar.innerHTML = weapons.map((weapon, index) => `
       <article class="weapon-card" data-weapon-key="${weapon.key}" style="--slot-card-image: ${cssUrl(weapon.slotCardAsset)}">
+        <strong style="padding-left: 16px" class="weapon-nickname">${weapon.nickname}</strong>
         <button class="weapon-info-button" data-info-weapon-key="${weapon.key}" type="button" aria-label="View ${weapon.name} attributes">i</button>
         <span class="slot-label">Slot ${index + 1}</span>
         <img class="weapon-art" src="${assetUrl(weapon.hudAsset)}" alt="" draggable="false">
-        <strong>${weapon.name}</strong>
         <small>${weapon.price}g</small>
       </article>
     `).join("");

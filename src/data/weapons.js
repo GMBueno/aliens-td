@@ -4,7 +4,7 @@ export const weapons = [
   {
     key: "handgun",
     name: "Handgun",
-    nickname: "Reliable",
+    nickname: "Handgun",
     description: "Cheap sidearm turret with steady single-target shots.",
     price: 90,
     level: 1,
@@ -23,7 +23,7 @@ export const weapons = [
   {
     key: "sniper",
     name: "Sniper",
-    nickname: "Longwatch",
+    nickname: "Sniper",
     description: "Longest range, slowest cadence, heavy direct damage.",
     price: 210,
     level: 1,
@@ -42,7 +42,7 @@ export const weapons = [
   {
     key: "shotgun",
     name: "Shotgun",
-    nickname: "Scatter",
+    nickname: "Shotgun",
     description: "Fires close-range pellets into clustered aliens.",
     price: 160,
     level: 1,
@@ -63,7 +63,7 @@ export const weapons = [
   {
     key: "assault_rifle",
     name: "Assault Rifle",
-    nickname: "Linebreaker",
+    nickname: "AR",
     description: "Balanced automatic fire for mixed waves.",
     price: 170,
     level: 1,
@@ -82,7 +82,7 @@ export const weapons = [
   {
     key: "magnum",
     name: "Magnum",
-    nickname: "Hard Stop",
+    nickname: "Magnum",
     description: "Slow, loud, and punchy. Excellent against armored aliens.",
     price: 150,
     level: 1,
@@ -101,7 +101,7 @@ export const weapons = [
   {
     key: "machine_pistol",
     name: "Machine Pistol",
-    nickname: "Needler",
+    nickname: "MP",
     description: "Shorter range with very fast bursts.",
     price: 130,
     level: 1,

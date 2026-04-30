@@ -261,12 +261,12 @@ button:disabled {
 .mission-chip {
   --hud-chip-bg: var(--hud-mission-plaque);
   justify-content: center;
-  padding-left: 68px;
+  padding-left: 80px;
 }
 
 .wave-chip {
   --hud-chip-bg: var(--hud-wave-plaque);
-  width: 104px;
+  width: 130px;
   justify-content: flex-end;
   padding-left: 44px;
   padding-right: 18px;
@@ -274,7 +274,7 @@ button:disabled {
 
 .kills-chip {
   --hud-chip-bg: var(--hud-kills-plaque);
-  width: 116px;
+  width: 140px;
   justify-content: flex-end;
   padding-left: 44px;
   padding-right: 18px;
@@ -627,6 +627,18 @@ button:disabled {
   color: var(--text);
   background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
+}
+
+.weapon-card .weapon-nickname {
+  position: absolute;
+  top: 23px;
+  left: 16px;
+  z-index: 1;
+  max-width: calc(100% - 56px);
+  font-size: 0.9rem;
+  text-align: left;
+  transform: none;
+  pointer-events: none;
 }
 
 .weapon-info-button {
